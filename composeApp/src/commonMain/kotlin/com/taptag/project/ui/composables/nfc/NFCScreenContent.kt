@@ -29,8 +29,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
 import com.taptag.project.ui.screens.NFCScreen.NFCState
+import com.taptag.project.ui.screens.NFCScreen.ReadNfcScreen
 import com.taptag.project.ui.theme.NFCScannerTheme
 
 @Composable
@@ -42,6 +46,22 @@ fun NFCScreenContent(
     pulseAnimation: State<Float>,
     iconOpacity: State<Float>
 ) {
+    val navigator = LocalNavigator.currentOrThrow
+
+    if (state.showResultDialog){
+        state.nfcResult?.let {
+            SuccessContent(
+                onViewContactClick = {
+                    navigator.parent?.push(ReadNfcScreen())
+                    nfcScreenModel.isScanning(false)
+                    nfcScreenModel.toggleResultDialog(false)
+                },
+                onDismiss = {
+                    nfcScreenModel.toggleResultDialog(false)
+                }
+            )
+        }
+    }
 
     Column(
         modifier = Modifier

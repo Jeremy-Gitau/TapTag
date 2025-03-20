@@ -61,7 +61,7 @@ fun AnalyticsScreenContent(
                 actions = {
                     IconButton(
                         onClick = {
-                            navigator.push(UserSettingsScreen())
+                            navigator.parent?.push(UserSettingsScreen())
                         },
                         modifier = Modifier
                             .padding(5.dp)
@@ -81,8 +81,6 @@ fun AnalyticsScreenContent(
                         )
                     }
                 },
-//                modifier = Modifier
-//                    .windowInsetsPadding(WindowInsets.safeDrawing),
                 colors = TopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -135,7 +133,7 @@ fun AnalyticsScreenContent(
                         )
 
                         TextButton(
-                            onClick = { navigator.push(ContactScreen()) }
+                            onClick = { navigator.parent?.push(ContactScreen()) }
                         ) {
                             Text(
                                 text = "Details",

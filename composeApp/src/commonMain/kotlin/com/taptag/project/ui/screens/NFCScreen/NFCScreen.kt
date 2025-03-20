@@ -1,5 +1,6 @@
 package com.taptag.project.ui.screens.NFCScreen
 
+
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -10,15 +11,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.taptag.project.data.nfcManager.getNFCManager
 import com.taptag.project.ui.composables.nfc.ErrorContent
 import com.taptag.project.ui.composables.nfc.NFCScreenContent
-import com.taptag.project.ui.composables.nfc.SuccessContent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -76,13 +74,6 @@ class NFCScreen : Screen {
             )
         }
 
-        if (state.showResultDialog){
-            state.nfcResult?.let {
-                SuccessContent(nfcData = it) {
-
-                }
-            }
-        }
         if (state.isScanning) {
             println("scanning for nfc")
             nfcManager.RegisterApp()

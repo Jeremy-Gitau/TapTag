@@ -69,7 +69,7 @@ class HomeScreen : Screen {
                                     Icon(
                                         imageVector = item.icon,
                                         contentDescription = item.title,
-                                        tint = if (selectedTab == index) NFCScannerTheme.PrimaryGreen else NFCScannerTheme.TextGrayDarker
+                                        tint = if (selectedTab == index) MaterialTheme.colorScheme.primary else  MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 onClick = {
