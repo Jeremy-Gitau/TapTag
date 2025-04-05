@@ -1,22 +1,55 @@
 package com.taptag.project.ui.screens.settings
 
 import cafe.adriel.voyager.core.model.StateScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
+import com.taptag.project.domain.repository.PreferenceRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class SettingsState(
-    val isDarkMode: Boolean = false
+    val isDarkMode: Flow<Boolean> = flowOf(false),
+    val accessToken: Flow<String> = flowOf("")
 )
 
-class SettingsScreenModel() :
-    StateScreenModel<SettingsState>(initialState = SettingsState()) {
+class SettingsScreenModel(
+    private val preferenceRepository: PreferenceRepository
+) : StateScreenModel<SettingsState>(initialState = SettingsState()) {
 
-    fun observeDarkMode(state: Boolean) {
+//    init {
+//        observeDarkMode()
+//        observeAccessToken()
+//    }
 
-        mutableState.update {
-            it.copy(
-                isDarkMode = state
-            )
-        }
+     fun observeDarkMode() {
+
+         screenModelScope.launch {
+             mutableState.update {
+                 it.copy(
+                     isDarkMode = preferenceRepository.isDarkModeEnabled
+                 )
+             }
+         }
 
     }
+
+    fun toggleDarkMode(){
+        screenModelScope.launch {
+            preferenceRepository.toggleDarkMode()
+        }
+    }
+
+    fun observeAccessToken(){
+
+        screenModelScope.launch {
+            mutableState.update {
+                it.copy(
+                    accessToken = preferenceRepository.readAccessToken()
+                )
+            }
+        }
+    }
+
+
 }

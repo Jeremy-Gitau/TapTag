@@ -4,20 +4,26 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthRequestData(
-    val name: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
     val email: String,
-    val password: String
+    val workEmail: String? = null,
+    val company: String? = null,
+    val password: String,
+    val confirmPassword: String? = null
 )
 
 @Serializable
 data class AuthResponseData(
-    val token: String,
+    val accessToken: String,
+    val refreshToken: String,
     val user: UserData
 )
 
 @Serializable
 data class UserData(
     val id: String,
-    val name: String,
+    val firstName: String,
+    val lastName: String,
     val email: String
 )

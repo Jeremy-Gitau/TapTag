@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,6 +56,8 @@ fun UserSettingsScreenContent(
     onDismiss: (Boolean) -> Unit,
     authState: AuthState
 ) {
+
+    val isDarkTheme = settingsState.isDarkMode.collectAsState(initial = false).value
 
     Scaffold(
 
@@ -78,10 +81,10 @@ fun UserSettingsScreenContent(
             }, actions = {
 
                 IconButton(onClick = {
-                    settingsScreenModel.observeDarkMode(!settingsState.isDarkMode)
+                    settingsScreenModel.toggleDarkMode()
                 }) {
                     Icon(
-                        imageVector = if (!settingsState.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        imageVector = if (!isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                         contentDescription = "theme icon"
                     )
                 }
@@ -144,9 +147,6 @@ fun UserSettingsScreenContent(
                                 icon = Icons.Default.Password,
                                 onNavigatorClicked = {})
 
-                            SettingsCard(text = "Upgrade",
-                                icon = Icons.Default.Upgrade,
-                                onNavigatorClicked = {})
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))

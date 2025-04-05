@@ -12,8 +12,8 @@ interface NfcServerClient {
 
     suspend fun registerUser(data: AuthRequestData): NetworkResult<AuthResponseData>
     suspend fun loginUser(data: AuthRequestData): NetworkResult<AuthResponseData>
-    suspend fun saveNewContact(data: ContactsRequestData): NetworkResult<ContactData>
-    suspend fun getAllContacts(): NetworkResult<List<ContactData>>
+    suspend fun saveNewContact(data: ContactsRequestData, token: String): NetworkResult<ContactData>
+    suspend fun getAllContacts(token: String): NetworkResult<List<ContactData>>
     suspend fun initiatePayments(data: PaymentsRequestData)
 
 }

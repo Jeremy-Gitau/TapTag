@@ -16,6 +16,7 @@ val clientsModule = module {
             install(ContentNegotiation){
                 json(json = Json {
                     ignoreUnknownKeys = true
+                    prettyPrint = true
                 })
             }
         }

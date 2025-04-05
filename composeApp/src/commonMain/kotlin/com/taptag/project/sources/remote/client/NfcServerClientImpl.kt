@@ -10,7 +10,9 @@ import com.taptag.project.sources.remote.helpers.Endpoints
 import com.taptag.project.sources.remote.helpers.NetworkResult
 import com.taptag.project.sources.remote.helpers.safeApiCall
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.accept
+import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -29,6 +31,8 @@ class NfcServerClientImpl(
     override suspend fun registerUser(data: AuthRequestData): NetworkResult<AuthResponseData> =
         safeApiCall {
 
+            println("registered client data: $data")
+
             val responseData: HttpResponse = client.post(
                 Endpoints.RegisterUser.url
             ) {
@@ -37,11 +41,20 @@ class NfcServerClientImpl(
                 setBody(data)
             }
 
+            println("user response data from client: $responseData")
+
+            if (responseData.status.value != 201) {
+                val errorText = responseData.bodyAsText()
+                NetworkResult.Error("Server error: ${responseData.status.value} - $errorText")
+            }
+
             val userResponse: AuthResponseData = json.decodeFromString(
                 responseData.bodyAsText()
             )
 
             client.close()
+
+            println("registered User: $userResponse")
 
             userResponse
         }
@@ -49,7 +62,7 @@ class NfcServerClientImpl(
     override suspend fun loginUser(data: AuthRequestData): NetworkResult<AuthResponseData> =
         safeApiCall {
 
-            val response: HttpResponse = client.get(
+            val response: HttpResponse = client.post(
                 Endpoints.LoginUser.url
             ) {
                 contentType(ContentType.Application.Json)
@@ -66,7 +79,10 @@ class NfcServerClientImpl(
             userResponse
         }
 
-    override suspend fun saveNewContact(data: ContactsRequestData): NetworkResult<ContactData> =
+    override suspend fun saveNewContact(
+        data: ContactsRequestData,
+        token: String
+    ): NetworkResult<ContactData> =
         safeApiCall {
 
             val response: HttpResponse = client.post(
@@ -74,6 +90,7 @@ class NfcServerClientImpl(
             ) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
+                bearerAuth(token = token)
                 setBody(data)
             }
 
@@ -86,23 +103,25 @@ class NfcServerClientImpl(
             contactResponse
         }
 
-    override suspend fun getAllContacts(): NetworkResult<List<ContactData>> = safeApiCall {
+    override suspend fun getAllContacts(token: String): NetworkResult<List<ContactData>> =
+        safeApiCall {
 
-        val response: HttpResponse = client.get(
-            Endpoints.GetAllContacts.url
-        ) {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
+            val response: HttpResponse = client.get(
+                Endpoints.GetAllContacts.url
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                bearerAuth(token = token)
+            }
+
+            val contactResponse: List<ContactData> = json.decodeFromString(
+                response.bodyAsText()
+            )
+
+            client.close()
+
+            contactResponse
         }
-
-        val contactResponse: List<ContactData> = json.decodeFromString(
-            response.bodyAsText()
-        )
-
-        client.close()
-
-        contactResponse
-    }
 
     override suspend fun initiatePayments(data: PaymentsRequestData) {
 

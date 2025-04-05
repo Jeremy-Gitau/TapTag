@@ -463,7 +463,7 @@ fun EmptyContactsView(navigator: Navigator, startScanning: @Composable () -> Uni
         Text(
             text = "Try adjusting your search or filters",
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -475,7 +475,7 @@ fun EmptyContactsView(navigator: Navigator, startScanning: @Composable () -> Uni
 //                startScanning()
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = NFCScannerTheme.PrimaryGreen
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text("Scan New Contact")

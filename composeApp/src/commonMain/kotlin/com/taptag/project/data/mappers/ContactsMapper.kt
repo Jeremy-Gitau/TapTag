@@ -10,14 +10,13 @@ import com.taptag.project.sources.remote.dtos.ContactsRequestData
 import com.taptag.project.sources.remote.dtos.ContactsResponseData
 
 fun ContactsResponseData.toDomain() = ContactsResponseDomain(
+    id = this.id,
     name = this.name,
     email = this.email,
     notes = this.notes,
     userId = this.userId,
-    _id = this._id,
     createdAt = this.createdAt,
     updatedAt = this.updatedAt,
-    __v = this.__v
 )
 
 fun ContactsRequestDomain.toDto() = ContactsRequestData(

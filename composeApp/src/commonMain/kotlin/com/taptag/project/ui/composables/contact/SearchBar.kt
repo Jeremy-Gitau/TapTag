@@ -64,7 +64,7 @@ fun SearchBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(end = 8.dp)
     ) {
         Box {
             OutlinedTextField(
@@ -75,7 +75,6 @@ fun SearchBar(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
                     .focusRequester(focusRequester),
                 placeholder = {
                     Text(

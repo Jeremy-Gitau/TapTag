@@ -16,6 +16,7 @@ actual fun getHttpClient(): HttpClient {
             json(
                 json = Json {
                     ignoreUnknownKeys = true
+                    prettyPrint = true
                 }
             )
         }

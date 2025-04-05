@@ -35,7 +35,7 @@ import com.taptag.project.ui.composables.contact.ContactTabRow
 import com.taptag.project.ui.composables.contact.EmptyContactsView
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
 
-class ContactScreen : Screen {
+class ContactScreen(private val token: String?) : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -50,7 +50,7 @@ class ContactScreen : Screen {
 
         LaunchedEffect(contactState.contacts) {
 
-            contactScreenModel.getAllContacts()
+            token?.let { contactScreenModel.getAllContacts(token = it) }
 
         }
 
@@ -64,8 +64,7 @@ class ContactScreen : Screen {
                             Text(
                                 text = "Contacts",
                                 style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(9.dp)
+                                fontWeight = FontWeight.Bold
                             )
                         } else {
 

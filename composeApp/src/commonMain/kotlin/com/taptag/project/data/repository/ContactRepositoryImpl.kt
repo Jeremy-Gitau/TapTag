@@ -15,16 +15,16 @@ class ContactRepositoryImpl(
     private val client: NfcServerClient
 ) : ContactsRepository {
 
-    override suspend fun saveNewContact(data: ContactsRequestDomain): DataResult<ContactDomain> {
-        return when (val result = client.saveNewContact(data = data.toDto())) {
+    override suspend fun saveNewContact(data: ContactsRequestDomain, token: String): DataResult<ContactDomain> {
+        return when (val result = client.saveNewContact(data = data.toDto(), token = token)) {
 
             is NetworkResult.Error -> DataResult.Error(result.message)
             is NetworkResult.Success -> DataResult.Success(data = result.data.toDomain())
         }
     }
 
-    override suspend fun getAllContacts(): DataResult<List<ContactDomain>> {
-        return when (val result = client.getAllContacts()) {
+    override suspend fun getAllContacts(token: String): DataResult<List<ContactDomain>> {
+        return when (val result = client.getAllContacts(token = token)) {
 
             is NetworkResult.Error -> DataResult.Error(result.message)
             is NetworkResult.Success -> DataResult.Success(data = result.data.map { it.toDomain() })

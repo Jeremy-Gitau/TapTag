@@ -11,8 +11,8 @@ val uiModule = module {
 
 //    single { NFCScreenModel(useCase = get()) }
     singleOf(::NFCScreenModel)
-    single { AuthenticationScreenModel(get()) }
+    single { AuthenticationScreenModel(get(), get()) }
     single { ContactScreenModel(get()) }
-    single { SettingsScreenModel() }
+    factory { SettingsScreenModel(get()) }
 
 }

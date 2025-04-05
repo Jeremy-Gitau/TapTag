@@ -34,19 +34,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
-import com.taptag.project.domain.models.UserRequestDomain
+import com.taptag.project.domain.models.AuthRequestDomain
 import com.taptag.project.ui.screens.authentication.AuthState
 import com.taptag.project.ui.screens.authentication.signInScreen.SignInScreen
 import kotlin.reflect.KFunction1
 
 @Composable
 fun SignUpContent(
-    onClickSignUp: KFunction1<UserRequestDomain, Unit>,
+    onClickSignUp: KFunction1<AuthRequestDomain, Unit>,
     state: AuthState,
     navigate: Navigator
 ) {
     var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
+    var secondName by remember { mutableStateOf("") }
     var company by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -68,20 +68,20 @@ fun SignUpContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Logo Circle
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+//            Box(
+//                modifier = Modifier
+//                    .size(64.dp)
+//                    .clip(CircleShape)
+//                    .background(Color(0xFF10B981)),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Person,
+//                    contentDescription = null,
+//                    tint = Color.White,
+//                    modifier = Modifier.size(32.dp)
+//                )
+//            }
 
             // Header
             Text(
@@ -111,8 +111,8 @@ fun SignUpContent(
                 )
 
                 OutlinedTextField(
-                    value = lastName,
-                    onValueChange = { lastName = it },
+                    value = secondName,
+                    onValueChange = { secondName = it },
                     label = { Text("Last Name") },
                     placeholder = { Text("Doe") },
                     modifier = Modifier.weight(1f)
@@ -172,10 +172,14 @@ fun SignUpContent(
             Button(
                 onClick = {
                     onClickSignUp(
-                        UserRequestDomain(
-                            name = firstName + lastName,
+                        AuthRequestDomain(
+                            firstName = firstName,
+                            secondName = secondName,
+                            company = company,
                             email = email,
-                            password = password
+                            workEmail = email,
+                            password = password,
+                            confirmPassword = confirmPassword
                         )
                     )
                 },

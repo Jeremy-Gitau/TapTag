@@ -45,7 +45,8 @@ fun AnalyticsScreenContent(
     onContactExpandToggled: (Int) -> Unit,
     modifier: Modifier = Modifier,
     navigator: Navigator,
-    nfcScreenModel: NFCScreenModel
+    nfcScreenModel: NFCScreenModel,
+    token: String?
 ) {
 
     Scaffold(
@@ -133,13 +134,13 @@ fun AnalyticsScreenContent(
                         )
 
                         TextButton(
-                            onClick = { navigator.parent?.push(ContactScreen()) }
+                            onClick = { navigator.parent?.push(ContactScreen(token = token)) }
                         ) {
                             Text(
                                 text = "Details",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.W600,
-                                color = NFCScannerTheme.PrimaryGreen
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
 
@@ -147,11 +148,6 @@ fun AnalyticsScreenContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-//                        ContactTabRow(
-//                            activeTab = contactState.activeTab,
-//                            onTabSelected = onTabSelected
-//                        )
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 if (contactState.contacts.isEmpty()) {

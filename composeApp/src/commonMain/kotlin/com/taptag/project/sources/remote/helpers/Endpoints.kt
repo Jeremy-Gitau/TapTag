@@ -2,7 +2,7 @@ package com.taptag.project.sources.remote.helpers
 
 sealed class Endpoints(private val path: String) {
 
-    private val baseUrl = "http://localhost:5000/api/"
+    private val baseUrl = "https://nfc-contact-app-06c90874a73f.herokuapp.com/api/"
 
     val url: String
         get() = "$baseUrl$path"

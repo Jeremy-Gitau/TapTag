@@ -1,6 +1,8 @@
 package com.taptag.project.ui.screens.settings
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.screen.Screen
@@ -15,10 +17,10 @@ class UserSettingsScreen: Screen {
     @Composable
     override fun Content() {
 
-        val settingsScreenModel: SettingsScreenModel = koinScreenModel()
-        val settingsState by settingsScreenModel.state.collectAsState()
         val authenticationScreenModel: AuthenticationScreenModel = koinScreenModel()
         val authState by authenticationScreenModel.state.collectAsState()
+        val settingsScreenModel: SettingsScreenModel = koinScreenModel()
+        val settingsState by settingsScreenModel.state.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
 

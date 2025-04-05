@@ -1,12 +1,9 @@
 package com.taptag.project.ui.screens.home
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.PhoneIphone
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -19,17 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.ui.screens.NFCScreen.NFCScreen
 import com.taptag.project.ui.screens.analytics.AnalyticsScreen
-import com.taptag.project.ui.theme.NFCScannerTheme
 
-class HomeScreen : Screen {
+class HomeScreen() : Screen {
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
@@ -69,7 +63,7 @@ class HomeScreen : Screen {
                                     Icon(
                                         imageVector = item.icon,
                                         contentDescription = item.title,
-                                        tint = if (selectedTab == index) MaterialTheme.colorScheme.primary else  MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 onClick = {

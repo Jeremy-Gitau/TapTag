@@ -30,6 +30,10 @@ ktor = "2.3.7"
 material3 = "1.7.0"
 #material icons extended
 materialIconsExtended = "1.7.8"
+#datastore
+datastore ="1.1.4"
+# thread safe singleton
+atomicfu = "0.23.2"
 
 [libraries]
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -72,7 +76,9 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 androidx-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 #material icons extended
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
-
+#datastore
+datastore-preferences ={ module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu"}
 
 [bundles]
 voyager = ["voyager-navigator", "voyager-screenmodel", "voyager-koin"]

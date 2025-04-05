@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 object NFCScannerTheme {
     val DarkBackground = Color(0xFF111827)
     val DarkSurface = Color(0xFF1F2937)
-    val Primary = Color(0xFF34D399)
+    val Primary = Color(0xFF10B981)
     val PrimaryGreen = Color(0xFF237456)
     val PrimaryGreenDarker = Color(0xFF031B13)
     val PrimaryGreenLighter = Color(0xFF6EE7B7)
@@ -49,7 +49,7 @@ private val darkColorPalette = darkColorScheme(
 )
 
 private val lightColorPalette = lightColorScheme(
-    primary = NFCScannerTheme.PrimaryGreen,
+    primary = NFCScannerTheme.Primary,
     onPrimary = NFCScannerTheme.White,
     primaryContainer = NFCScannerTheme.PrimaryGreenLighter,
     onPrimaryContainer = NFCScannerTheme.Black,
@@ -75,9 +75,13 @@ private val lightColorPalette = lightColorScheme(
 @Composable
 fun NFCScannerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable (() -> Unit)
 ) {
     val colorScheme = if (darkTheme) darkColorPalette else lightColorPalette
+
+    println("app theme : $darkTheme")
+
+    println("color scheme : $colorScheme")
 
     MaterialTheme(
         colorScheme = colorScheme,

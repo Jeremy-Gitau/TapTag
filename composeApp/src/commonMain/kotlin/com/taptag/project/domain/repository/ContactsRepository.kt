@@ -8,10 +8,10 @@ import com.taptag.project.sources.remote.dtos.ContactsRequestData
 
 interface ContactsRepository {
 
-    suspend fun saveNewContact(data: ContactsRequestDomain):
+    suspend fun saveNewContact(data: ContactsRequestDomain, token: String):
             DataResult<ContactDomain>
 
-    suspend fun getAllContacts():
+    suspend fun getAllContacts(token: String):
             DataResult<List<ContactDomain>>
 
 }

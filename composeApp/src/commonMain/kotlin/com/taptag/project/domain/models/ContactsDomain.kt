@@ -7,14 +7,13 @@ data class ContactsRequestDomain(
 )
 
 data class ContactsResponseDomain(
+    val id: String,
     val name: String,
     val email: String,
     val notes: String,
     val userId: String,
-    val _id: String,
     val createdAt: String,
     val updatedAt: String,
-    val __v: Int
 )
 
 

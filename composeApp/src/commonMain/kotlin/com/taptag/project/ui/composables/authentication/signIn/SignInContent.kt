@@ -8,13 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,13 +28,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
-import com.taptag.project.domain.models.UserRequestDomain
+import com.taptag.project.domain.models.AuthRequestDomain
 import com.taptag.project.ui.screens.authentication.signUpScreen.SignUpScreen
 import kotlin.reflect.KFunction1
 
 @Composable
 fun SignInContent(
-    onSignIn: KFunction1<UserRequestDomain, Unit>,
+    onSignIn: KFunction1<AuthRequestDomain, Unit>,
     onForgotPassword: () -> Unit = {},
     onSignUp: () -> Unit = {},
     navigate: Navigator
@@ -61,21 +56,6 @@ fun SignInContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Logo Circle
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
 
             // Header
             Text(
@@ -115,25 +95,13 @@ fun SignInContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Password",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    TextButton(
-                        onClick = onForgotPassword,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = Color(0xFF10B981)
-                        )
-                    ) {
-                        Text("Forgot password?")
-                    }
-                }
+
+                Text(
+                    text = "Password",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -142,12 +110,26 @@ fun SignInContent(
                     singleLine = true
                 )
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = onForgotPassword,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Forgot password?")
+                }
+            }
 
             // Sign In Button
             Button(
                 onClick = {
                     onSignIn(
-                        UserRequestDomain(
+                        AuthRequestDomain(
                             email = email,
                             password = password
                         )
@@ -155,7 +137,7 @@ fun SignInContent(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF10B981)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text("Sign in")

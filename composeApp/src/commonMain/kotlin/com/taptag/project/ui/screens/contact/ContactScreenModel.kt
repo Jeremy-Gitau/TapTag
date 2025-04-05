@@ -49,7 +49,6 @@ class ContactScreenModel(
 
         screenModelScope.launch {
             mutableState.update { it.copy(activeTab = tab) }
-            getAllContacts()
         }
 
     }
@@ -58,7 +57,6 @@ class ContactScreenModel(
 
         screenModelScope.launch {
             mutableState.update { it.copy(searchQuery = query) }
-            getAllContacts()
         }
     }
 
@@ -88,7 +86,7 @@ class ContactScreenModel(
         }
     }
 
-    suspend fun saveContact(contact: ContactsRequestDomain) {
+    suspend fun saveContact(contact: ContactsRequestDomain, token: String) {
 
         screenModelScope.launch {
 
@@ -96,11 +94,11 @@ class ContactScreenModel(
 
                 isLoading(true)
 
-                when (val result = contactsRepository.saveNewContact(data = contact)) {
+                when (val result = contactsRepository.saveNewContact(data = contact, token = token)) {
 
                     is DataResult.Success -> {
 
-                        getAllContacts()
+                        getAllContacts(token = token)
                         isLoading(false)
                     }
 
@@ -119,11 +117,11 @@ class ContactScreenModel(
         }
     }
 
-    suspend fun getAllContacts() {
+    suspend fun getAllContacts(token: String) {
         screenModelScope.launch {
             try {
 
-                when (val result = contactsRepository.getAllContacts()) {
+                when (val result = contactsRepository.getAllContacts(token = token)) {
 
                     is DataResult.Success -> {
 
