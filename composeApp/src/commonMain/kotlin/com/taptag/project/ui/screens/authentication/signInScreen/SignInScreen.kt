@@ -8,8 +8,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.taptag.project.ui.common.ErrorDialog
+import com.taptag.project.ui.common.LoadingIndicator
 import com.taptag.project.ui.composables.authentication.signIn.SignInContent
-import com.taptag.project.ui.screens.authentication.AuthenticationScreenModel
+import com.taptag.project.ui.screens.authentication.UserScreenModel
 import com.taptag.project.ui.screens.home.HomeScreen
 
 class SignInScreen() : Screen {
@@ -17,19 +19,42 @@ class SignInScreen() : Screen {
     @Composable
     override fun Content() {
 
-        val authenticationScreenModel: AuthenticationScreenModel = koinScreenModel()
-        val authState by authenticationScreenModel.state.collectAsState()
+        val userScreenModel: UserScreenModel = koinScreenModel()
+        val userState by userScreenModel.state.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
 
-        if(authState.isAuthenticated) {
+        LaunchedEffect(userState.isAuthenticated) {
+            if (userState.isAuthenticated) {
+                navigator.push(HomeScreen())
+            }
+        }
 
-            navigator.push(HomeScreen())
+        LaunchedEffect(userState.error){
+            userScreenModel.toggleErrorDialog(true)
+        }
+
+        when {
+            userState.isLoading -> {
+                LoadingIndicator()
+            }
+
+            userState.showErrorDialog -> {
+
+                ErrorDialog(
+                    message = userState.error,
+                    onDismiss = {userScreenModel.toggleErrorDialog(false)},
+                    onRetry = null
+                )
+            }
+
         }
 
         SignInContent(
-            onSignIn = authenticationScreenModel::signInUser,
-            navigate = navigator
+            onSignIn = userScreenModel::signInUser,
+            navigate = navigator,
+            userState = userState
         )
+
     }
 }

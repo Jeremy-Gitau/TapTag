@@ -17,30 +17,36 @@ class SettingsScreenModel(
     private val preferenceRepository: PreferenceRepository
 ) : StateScreenModel<SettingsState>(initialState = SettingsState()) {
 
-//    init {
-//        observeDarkMode()
-//        observeAccessToken()
-//    }
+    init {
+        observeDarkMode()
+        observeAccessToken()
+    }
 
-     fun observeDarkMode() {
+    fun observeDarkMode() {
 
-         screenModelScope.launch {
-             mutableState.update {
-                 it.copy(
-                     isDarkMode = preferenceRepository.isDarkModeEnabled
-                 )
-             }
-         }
+        screenModelScope.launch {
+
+            val state = preferenceRepository.isDarkModeEnabled
+
+            mutableState.update {
+                it.copy(
+                    isDarkMode = state
+                )
+            }
+        }
+
 
     }
 
-    fun toggleDarkMode(){
+    fun toggleDarkMode() {
         screenModelScope.launch {
             preferenceRepository.toggleDarkMode()
+
+            observeDarkMode()
         }
     }
 
-    fun observeAccessToken(){
+    fun observeAccessToken() {
 
         screenModelScope.launch {
             mutableState.update {

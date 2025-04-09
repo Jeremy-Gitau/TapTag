@@ -5,8 +5,12 @@ import com.taptag.project.data.mappers.toDto
 import com.taptag.project.domain.helpers.DataResult
 import com.taptag.project.domain.models.AuthRequestDomain
 import com.taptag.project.domain.models.AuthResponseDomain
+import com.taptag.project.domain.models.RefreshTokenRequestDomain
+import com.taptag.project.domain.models.RefreshTokenResponseDomain
 import com.taptag.project.domain.repository.AuthenticationRepository
 import com.taptag.project.sources.remote.client.NfcServerClient
+import com.taptag.project.sources.remote.dtos.RefreshTokenRequestData
+import com.taptag.project.sources.remote.dtos.RefreshTokenResponseData
 import com.taptag.project.sources.remote.helpers.NetworkResult
 
 class AuthenticationRepositoryImpl(

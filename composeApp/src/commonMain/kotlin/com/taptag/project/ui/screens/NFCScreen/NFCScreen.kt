@@ -1,7 +1,5 @@
 package com.taptag.project.ui.screens.NFCScreen
 
-
-import android.annotation.SuppressLint
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,18 +9,21 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.taptag.project.data.nfcManager.getNFCManager
 import com.taptag.project.ui.composables.nfc.ErrorContent
 import com.taptag.project.ui.composables.nfc.NFCScreenContent
+import com.taptag.project.ui.composables.nfc.WriteTagDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class NFCScreen : Screen {
 
-    @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     override fun Content() {
 
@@ -54,17 +55,19 @@ class NFCScreen : Screen {
             ), label = ""
         )
 
+        // Listen for NFC tag detection
         scope.launch {
             nfcManager.tags.collectLatest { tagData ->
                 println("Test: I have detected a tag  $tagData")
-                nfcScreenModel.readTag(tagData)
-                nfcScreenModel.toggleResultDialog(true)
+                if (!state.isWriteMode) {
+                    // Regular read mode
+                    nfcScreenModel.readTag(tagData)
+                    nfcScreenModel.toggleResultDialog(true)
+                }
             }
         }
 
-
         if (state.showErrorDialog) {
-
             ErrorContent(
                 errorMessage = state.nfcResult.toString(),
                 onTryAgain = {},
@@ -89,7 +92,5 @@ class NFCScreen : Screen {
             pulseAnimation = pulseAnimation,
             iconOpacity = iconOpacity
         )
-
     }
-
 }

@@ -1,6 +1,7 @@
 package com.taptag.project.ui.composables.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,14 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.AlertDialog
@@ -44,7 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
-import com.taptag.project.ui.screens.authentication.AuthState
+import com.taptag.project.ui.screens.authentication.UserState
 import com.taptag.project.ui.screens.settings.SettingsScreenModel
 import com.taptag.project.ui.screens.settings.SettingsState
 
@@ -54,10 +52,10 @@ fun UserSettingsScreenContent(
     navigator: Navigator, settingsState: SettingsState, settingsScreenModel: SettingsScreenModel,
     onClickLogOut: () -> Unit,
     onDismiss: (Boolean) -> Unit,
-    authState: AuthState
+    userState: UserState
 ) {
 
-    val isDarkTheme = settingsState.isDarkMode.collectAsState(initial = false).value
+    val isDarkTheme = settingsState.isDarkMode.collectAsState(initial = isSystemInDarkTheme()).value
 
     Scaffold(
 
@@ -104,7 +102,7 @@ fun UserSettingsScreenContent(
             contentAlignment = Alignment.TopCenter
         ) {
 
-            if (authState.toggleLogOutDialog){
+            if (userState.toggleLogOutDialog){
                 LogOutDialog(
                     onDismiss = { onDismiss(false) },
                     onLogOutClicked = { onClickLogOut() }

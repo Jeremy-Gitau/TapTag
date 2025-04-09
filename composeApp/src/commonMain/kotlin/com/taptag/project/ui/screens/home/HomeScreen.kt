@@ -21,24 +21,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.ui.screens.NFCScreen.NFCScreen
-import com.taptag.project.ui.screens.analytics.AnalyticsScreen
+import com.taptag.project.ui.screens.analytics.DashboardScreen
 
-class HomeScreen() : Screen {
+class HomeScreen : Screen {
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     override fun Content() {
 
         val navigationItem = listOf(
-
             NavigationItem(
-//                title = "Analytics",
                 icon = Icons.Default.Dashboard,
-                screen = AnalyticsScreen()
+                screen = DashboardScreen()
             ),
 
             NavigationItem(
-//                title = "Scan",
                 icon = Icons.Default.PhoneIphone,
                 screen = NFCScreen()
             )
@@ -46,28 +43,27 @@ class HomeScreen() : Screen {
 
         var selectedTab by remember { mutableIntStateOf(0) }
 
-        Navigator(screen = AnalyticsScreen()) { navigator ->
+        Navigator(screen = navigationItem[selectedTab].screen) { navigator ->
             Scaffold(
                 bottomBar = {
                     NavigationBar(
-//                        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
                         containerColor = MaterialTheme.colorScheme.background,
                     ) {
-
-//                        HorizontalDivider()
-
                         navigationItem.forEachIndexed { index, item ->
-
                             NavigationBarItem(
                                 icon = {
                                     Icon(
                                         imageVector = item.icon,
                                         contentDescription = item.title,
-                                        tint = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (selectedTab == index)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 onClick = {
                                     selectedTab = index
+
                                     navigator.push(navigationItem[selectedTab].screen)
                                 },
                                 selected = selectedTab == index,
@@ -76,16 +72,14 @@ class HomeScreen() : Screen {
                                     indicatorColor = Color.Transparent
                                 )
                             )
-
                         }
                     }
                 }
             ) {
+                // The current screen will be rendered here
                 navigator.lastItem.Content()
             }
         }
-
-
     }
 }
 

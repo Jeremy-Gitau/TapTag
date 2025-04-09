@@ -15,6 +15,12 @@ sealed class Endpoints(private val path: String) {
 
     data object NewContact: Endpoints("contacts")
 
+    data class UpdateContact(val id: String): Endpoints("contacts/$id")
+
+    data class DeleteContact(val id: String): Endpoints("contacts/$id")
+
+    data object RefreshToken: Endpoints("auth/refresh")
+
     data object InitiatePayment: Endpoints("payments/initiate")
 
 }

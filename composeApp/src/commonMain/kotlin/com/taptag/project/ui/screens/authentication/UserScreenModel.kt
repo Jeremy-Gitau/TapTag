@@ -6,25 +6,25 @@ import com.taptag.project.domain.helpers.DataResult
 import com.taptag.project.domain.models.AuthRequestDomain
 import com.taptag.project.domain.models.AuthResponseDomain
 import com.taptag.project.domain.repository.AuthenticationRepository
-import com.taptag.project.domain.preference.PreferenceManager
 import com.taptag.project.domain.repository.PreferenceRepository
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class AuthState(
+data class UserState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val message: String? = null,
     val currentUser: AuthResponseDomain? = null,
     val isAuthenticated: Boolean = false,
     val navigateToSignIn: Boolean = false,
-    val toggleLogOutDialog: Boolean = false
+    val toggleLogOutDialog: Boolean = false,
+    val showErrorDialog: Boolean = false
 )
 
-class AuthenticationScreenModel(
+class UserScreenModel(
     private val authRepository: AuthenticationRepository,
     private val preferenceRepository: PreferenceRepository
-) : StateScreenModel<AuthState>(initialState = AuthState()) {
+) : StateScreenModel<UserState>(initialState = UserState()) {
 
     private fun isLoading(loading: Boolean) {
         mutableState.value = state.value.copy(
@@ -38,11 +38,20 @@ class AuthenticationScreenModel(
         )
     }
 
-    fun toggleLogOutDialog(state: Boolean){
+    fun toggleLogOutDialog(state: Boolean) {
 
         mutableState.update {
             it.copy(
                 toggleLogOutDialog = state
+            )
+        }
+    }
+
+    fun toggleErrorDialog(state: Boolean) {
+
+        mutableState.update {
+            it.copy(
+                showErrorDialog = state
             )
         }
     }
@@ -88,15 +97,16 @@ class AuthenticationScreenModel(
 
     fun signInUser(data: AuthRequestDomain) {
         screenModelScope.launch {
+
             isLoading(true)
 
-            val result = authRepository.loginUser(data = data)
-
             try {
-                when (result) {
+                when (val result = authRepository.loginUser(data = data)) {
                     is DataResult.Success -> {
 
                         preferenceRepository.saveAccessToken(result.data.accessToken)
+
+                        preferenceRepository.saveRefreshToken(result.data.refreshToken)
 
                         mutableState.value = state.value.copy(
                             currentUser = result.data,

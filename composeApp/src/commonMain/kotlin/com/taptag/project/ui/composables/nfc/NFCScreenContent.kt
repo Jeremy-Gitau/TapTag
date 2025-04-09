@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
@@ -48,7 +47,7 @@ fun NFCScreenContent(
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
-    if (state.showResultDialog){
+    if (state.showResultDialog) {
         state.nfcResult?.let {
             SuccessContent(
                 onViewContactClick = {

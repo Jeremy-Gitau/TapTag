@@ -30,23 +30,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
+import com.taptag.project.domain.models.AuthResponseDomain
 import com.taptag.project.ui.composables.contact.ContactItem
 import com.taptag.project.ui.composables.contact.EmptyContactsView
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
 import com.taptag.project.ui.screens.contact.ContactScreen
 import com.taptag.project.ui.screens.contact.ContactState
 import com.taptag.project.ui.screens.settings.UserSettingsScreen
-import com.taptag.project.ui.theme.NFCScannerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsScreenContent(
+fun DashboardScreenContent(
     contactState: ContactState,
     onContactExpandToggled: (Int) -> Unit,
     modifier: Modifier = Modifier,
     navigator: Navigator,
     nfcScreenModel: NFCScreenModel,
-    token: String?
+    token: String?,
+    currentUser: AuthResponseDomain?
 ) {
 
     Scaffold(
@@ -55,8 +56,8 @@ fun AnalyticsScreenContent(
             TopAppBar(
                 title = {
                     ProfileHeader(
-                        name = "Sarah",
-                        role = "Product Manager at TechCorp"
+                        name = currentUser?.user?.firstName ?: "Welcome",
+                        role = "Product Manager at TechCorp"    
                     )
                 },
                 actions = {

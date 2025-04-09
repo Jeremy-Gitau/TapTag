@@ -1,20 +1,21 @@
 package com.taptag.project.sources.remote.client
 
-import com.taptag.project.sources.remote.dtos.ContactsRequestData
-import com.taptag.project.sources.remote.dtos.ContactsResponseData
-import com.taptag.project.sources.remote.dtos.PaymentsRequestData
 import com.taptag.project.sources.remote.dtos.AuthRequestData
 import com.taptag.project.sources.remote.dtos.AuthResponseData
 import com.taptag.project.sources.remote.dtos.ContactData
+import com.taptag.project.sources.remote.dtos.ContactsRequestData
+import com.taptag.project.sources.remote.dtos.PaymentsRequestData
+import com.taptag.project.sources.remote.dtos.RefreshTokenRequestData
+import com.taptag.project.sources.remote.dtos.RefreshTokenResponseData
 import com.taptag.project.sources.remote.helpers.Endpoints
 import com.taptag.project.sources.remote.helpers.NetworkResult
 import com.taptag.project.sources.remote.helpers.safeApiCall
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -114,6 +115,10 @@ class NfcServerClientImpl(
                 bearerAuth(token = token)
             }
 
+            if (response.status.value == 401){
+                NetworkResult.Error(message ="User not authenticated")
+            }
+
             val contactResponse: List<ContactData> = json.decodeFromString(
                 response.bodyAsText()
             )
@@ -123,9 +128,79 @@ class NfcServerClientImpl(
             contactResponse
         }
 
+
+    override suspend fun updateContact(
+        data: ContactsRequestData,
+        id: String
+    ): NetworkResult<ContactData> =
+        safeApiCall {
+            val response: HttpResponse = client.put(
+                Endpoints.UpdateContact(id = id).url
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(data)
+            }
+
+            val updatedResponse: ContactData = json.decodeFromString(
+                response.bodyAsText()
+            )
+
+            client.close()
+
+            updatedResponse
+
+        }
+
+    override suspend fun deleteContact(id: String): NetworkResult<Boolean> =
+        safeApiCall {
+            val response: HttpResponse = client.put(
+                Endpoints.DeleteContact(id = id).url
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+            }
+
+            if (response.status.value == 200) {
+                NetworkResult.Success(true)
+            } else if (response.status.value == 404) {
+                NetworkResult.Error(message = "Contact not found")
+            } else if (response.status.value == 401) {
+                NetworkResult.Error(message = "User Not Authenticated")
+            } else {
+                NetworkResult.Error(message = "Network Error")
+            }
+
+            client.close()
+
+            true
+
+        }
+
+    override suspend fun refreshToken(data: RefreshTokenRequestData): NetworkResult<RefreshTokenResponseData> =
+        safeApiCall {
+
+            val response: HttpResponse = client.post(
+                Endpoints.RefreshToken.url
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(data)
+            }
+
+            val tokenResponse: RefreshTokenResponseData = json.decodeFromString(
+                response.bodyAsText()
+            )
+
+            client.close()
+
+            tokenResponse
+
+        }
+
     override suspend fun initiatePayments(data: PaymentsRequestData) {
 
-        val response: HttpResponse = client.post(
+        client.post(
             Endpoints.InitiatePayment.url
         ) {
             contentType(ContentType.Application.Json)

@@ -6,7 +6,9 @@ import com.taptag.project.domain.helpers.DataResult
 import com.taptag.project.domain.models.ContactDomain
 import com.taptag.project.domain.models.ContactStatus
 import com.taptag.project.domain.models.ContactsRequestDomain
+import com.taptag.project.domain.models.RefreshTokenRequestDomain
 import com.taptag.project.domain.repository.ContactsRepository
+import com.taptag.project.domain.repository.PreferenceRepository
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,11 +24,13 @@ data class ContactState(
     val newContactsThisMonth: Int = 5,
     val pendingFollowUps: Int = 5,
     val meetingsThisWeek: Int = 3,
-    val searchState: Boolean = false
+    val searchState: Boolean = false,
+    val showErrorDialog: Boolean = false
 )
 
 class ContactScreenModel(
-    private val contactsRepository: ContactsRepository
+    private val contactsRepository: ContactsRepository,
+    private val preferenceRepository: PreferenceRepository
 ) : StateScreenModel<ContactState>(initialState = ContactState()) {
 
     private fun isLoading(state: Boolean) {
@@ -43,6 +47,15 @@ class ContactScreenModel(
                 error = message
             )
         }
+    }
+
+    suspend fun getToken(): String? {
+        return preferenceRepository.readAccessToken().toString()
+    }
+
+    suspend fun <T> withAuthToken(block: suspend (String) -> DataResult<T>): DataResult<T> {
+        val token = getToken() ?: return DataResult.Error("No authentication token found")
+        return block(token)
     }
 
     fun onTabSelected(tab: ContactStatus?) {
@@ -86,7 +99,15 @@ class ContactScreenModel(
         }
     }
 
-    suspend fun saveContact(contact: ContactsRequestDomain, token: String) {
+    fun toggleShowErrorDialog(state: Boolean) {
+        mutableState.update {
+            it.copy(
+                showErrorDialog = state
+            )
+        }
+    }
+
+    fun saveContact(contact: ContactsRequestDomain) {
 
         screenModelScope.launch {
 
@@ -94,17 +115,50 @@ class ContactScreenModel(
 
                 isLoading(true)
 
-                when (val result = contactsRepository.saveNewContact(data = contact, token = token)) {
+                val result = withAuthToken { token ->
+                    contactsRepository.getAllContacts(token)
+                }
+
+                when (result) {
 
                     is DataResult.Success -> {
 
-                        getAllContacts(token = token)
+                        fetchAllContacts()
                         isLoading(false)
                     }
 
                     is DataResult.Error -> {
 
-                        handleError("error saving contact: ${result.message}")
+                        if (result.message.contains("Token is not valid") || result.message.contains(
+                                "User not authenticated"
+                            )
+                        ) {
+
+                            preferenceRepository.deleteAccessToken()
+
+                            val newToken = contactsRepository.refreshToken(
+                                data = RefreshTokenRequestDomain(
+                                    refreshToken = preferenceRepository.readRefreshToken()
+                                        .toString()
+                                )
+                            )
+
+                            when (newToken) {
+                                is DataResult.Success -> {
+                                    preferenceRepository.saveAccessToken(token = newToken.data.accessToken)
+                                    preferenceRepository.deleteRefreshToken()
+                                    preferenceRepository.saveRefreshToken(token = newToken.data.refreshToken)
+                                }
+
+                                is DataResult.Error -> {
+
+                                    handleError(newToken.message)
+                                }
+                            }
+
+
+                        } else
+                            handleError("error saving contact: ${result.message}")
                     }
                 }
 
@@ -117,11 +171,17 @@ class ContactScreenModel(
         }
     }
 
-    suspend fun getAllContacts(token: String) {
+    fun fetchAllContacts() {
         screenModelScope.launch {
             try {
 
-                when (val result = contactsRepository.getAllContacts(token = token)) {
+                isLoading(true)
+
+                val result = withAuthToken { token ->
+                    contactsRepository.getAllContacts(token)
+                }
+
+                when (result) {
 
                     is DataResult.Success -> {
 
@@ -136,7 +196,37 @@ class ContactScreenModel(
 
                     is DataResult.Error -> {
 
-                        handleError("error fetching contacts: ${result.message}")
+                        if (result.message.contains("Token is not valid") || result.message.contains(
+                                "User not authenticated"
+                            )
+                        ) {
+
+                            preferenceRepository.deleteAccessToken()
+
+                            val newToken = contactsRepository.refreshToken(
+                                data = RefreshTokenRequestDomain(
+                                    refreshToken = preferenceRepository.readRefreshToken()
+                                        .toString()
+                                )
+                            )
+
+                            when (newToken) {
+                                is DataResult.Success -> {
+                                    preferenceRepository.saveAccessToken(token = newToken.data.accessToken)
+                                    preferenceRepository.deleteRefreshToken()
+                                    preferenceRepository.saveRefreshToken(token = newToken.data.refreshToken)
+                                }
+
+                                is DataResult.Error -> {
+
+                                    handleError(newToken.message)
+                                }
+                            }
+
+
+                        } else
+                            handleError("error fetching contacts: ${result.message}")
+
                     }
                 }
                 isLoading(false)
@@ -146,6 +236,31 @@ class ContactScreenModel(
                 isLoading(false)
                 handleError("error fetching contacts: ${e.message}")
             }
+        }
+    }
+
+    fun updateContact(data: ContactsRequestDomain, id: String) {
+
+        screenModelScope.launch {
+
+            isLoading(true)
+
+            contactsRepository.updateContacts(data = data, id = id)
+
+            fetchAllContacts()
+
+            isLoading(false)
+        }
+    }
+
+    fun deleteContact(id: String) {
+
+        screenModelScope.launch {
+            isLoading(true)
+
+            contactsRepository.deleteContacts(id = id)
+
+            isLoading(false)
         }
     }
 }

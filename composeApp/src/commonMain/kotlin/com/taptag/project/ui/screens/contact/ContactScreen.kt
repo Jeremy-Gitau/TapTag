@@ -50,7 +50,7 @@ class ContactScreen(private val token: String?) : Screen {
 
         LaunchedEffect(contactState.contacts) {
 
-            token?.let { contactScreenModel.getAllContacts(token = it) }
+            token?.let { contactScreenModel.fetchAllContacts() }
 
         }
 

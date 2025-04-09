@@ -5,11 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.domain.models.AuthRequestDomain
+import com.taptag.project.ui.common.LoadingIndicator
+import com.taptag.project.ui.screens.authentication.UserState
 import com.taptag.project.ui.screens.authentication.signUpScreen.SignUpScreen
 import kotlin.reflect.KFunction1
 
@@ -37,7 +44,8 @@ fun SignInContent(
     onSignIn: KFunction1<AuthRequestDomain, Unit>,
     onForgotPassword: () -> Unit = {},
     onSignUp: () -> Unit = {},
-    navigate: Navigator
+    navigate: Navigator,
+    userState: UserState
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -86,7 +94,8 @@ fun SignInContent(
                     onValueChange = { email = it },
                     placeholder = { Text("name@company.com") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !userState.isLoading
                 )
             }
 
@@ -107,7 +116,8 @@ fun SignInContent(
                     onValueChange = { password = it },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !userState.isLoading
                 )
             }
             Row(
@@ -138,9 +148,22 @@ fun SignInContent(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                enabled = !userState.isLoading
             ) {
-                Text("Sign in")
+                Row (
+                    horizontalArrangement = Arrangement.Center
+                ){
+                    Text("Sign in")
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    if(userState.isLoading)
+                        Box(modifier = Modifier.size(20.dp)) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                }
+
             }
 
             // Sign Up Link

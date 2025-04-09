@@ -7,7 +7,7 @@ import com.taptag.project.data.repository.PaymentRepositoryImpl
 import com.taptag.project.data.repository.PreferenceRepositoryImpl
 import com.taptag.project.domain.repository.AuthenticationRepository
 import com.taptag.project.domain.repository.ContactsRepository
-import com.taptag.project.domain.preference.PreferenceManager
+import com.taptag.project.domain.preference.AppPreferenceManager
 import com.taptag.project.domain.repository.PaymentsRepository
 import com.taptag.project.domain.repository.PreferenceRepository
 import org.koin.core.module.Module
@@ -20,7 +20,7 @@ val dataModule = module {
     single<AuthenticationRepository> { AuthenticationRepositoryImpl(get()) }
     single<ContactsRepository> { ContactRepositoryImpl(get()) }
     single<PaymentsRepository> { PaymentRepositoryImpl(get()) }
-    single<PreferenceManager> { PreferenceManagerImpl(get()) }
+    single<AppPreferenceManager> { PreferenceManagerImpl(get()) }
     single<PreferenceRepository> { PreferenceRepositoryImpl(get()) }
 
 }

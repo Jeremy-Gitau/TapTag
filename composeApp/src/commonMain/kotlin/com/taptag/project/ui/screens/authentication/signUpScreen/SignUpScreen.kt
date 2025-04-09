@@ -18,7 +18,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.taptag.project.ui.composables.authentication.signUp.SignUpContent
-import com.taptag.project.ui.screens.authentication.AuthenticationScreenModel
+import com.taptag.project.ui.screens.authentication.UserScreenModel
 import com.taptag.project.ui.screens.authentication.signInScreen.SignInScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +27,7 @@ class SignUpScreen : Screen {
     @Composable
     override fun Content() {
 
-        val authenticationScreenModel: AuthenticationScreenModel = koinScreenModel()
+        val authenticationScreenModel: UserScreenModel = koinScreenModel()
         val authState by authenticationScreenModel.state.collectAsState()
 
         var dismiss by remember { mutableStateOf(false) }

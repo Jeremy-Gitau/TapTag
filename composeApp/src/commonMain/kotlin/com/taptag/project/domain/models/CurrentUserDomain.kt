@@ -22,3 +22,12 @@ data class CurrentUserDomain(
     val secondName: String,
     val email: String
 )
+
+data class RefreshTokenRequestDomain(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponseDomain(
+    val accessToken: String,
+    val refreshToken: String
+)

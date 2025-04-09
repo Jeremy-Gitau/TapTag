@@ -11,14 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import cafe.adriel.voyager.core.registry.screenModule
 import com.taptag.project.ui.screens.settings.SettingsScreenModel
-import kotlinx.coroutines.flow.collectLatest
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
@@ -37,17 +32,18 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val settingsScreenModel: SettingsScreenModel = koinInject<SettingsScreenModel>()
-            val settingsState = settingsScreenModel.state.collectAsState().value
+            val settingsScreenModel: SettingsScreenModel = koinInject()
+            val settingsState by settingsScreenModel.state.collectAsState()
 
-            val isDarkMode by settingsState.isDarkMode.collectAsState(initial = isSystemInDarkTheme())
-
-            println("dark mode state is: $isDarkMode")
+            val isDarkMode = settingsState.isDarkMode.collectAsState(initial = isSystemInDarkTheme()).value
 
             LaunchedEffect(Unit) {
+
                 settingsScreenModel.observeDarkMode()
-                println("launched dark mode state is: $isDarkMode")
+
             }
+
+            println("dark mode state is: $isDarkMode")
 
             App(isDarkMode = isDarkMode)
 

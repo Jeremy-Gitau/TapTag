@@ -27,3 +27,14 @@ data class UserData(
     val lastName: String,
     val email: String
 )
+
+@Serializable
+data class RefreshTokenRequestData(
+    val refreshToken: String
+)
+
+@Serializable
+data class RefreshTokenResponseData(
+    val accessToken: String,
+    val refreshToken: String
+)

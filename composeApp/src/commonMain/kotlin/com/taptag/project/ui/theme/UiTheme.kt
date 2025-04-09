@@ -79,10 +79,6 @@ fun NFCScannerTheme(
 ) {
     val colorScheme = if (darkTheme) darkColorPalette else lightColorPalette
 
-    println("app theme : $darkTheme")
-
-    println("color scheme : $colorScheme")
-
     MaterialTheme(
         colorScheme = colorScheme,
         content = content,
