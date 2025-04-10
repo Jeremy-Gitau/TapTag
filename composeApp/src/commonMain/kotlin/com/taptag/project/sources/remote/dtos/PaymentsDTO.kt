@@ -1,13 +1,14 @@
 package com.taptag.project.sources.remote.dtos
 
+import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class PaymentsRequestData(
+@Entity(tableName = "payment")
+data class PaymentsRequestEntity(
     val amount: Int,
-    val paymentMethod: PaymentMethod
+    val paymentMethod: PaymentMethodEntity
 )
 
-enum class PaymentMethod{
+enum class PaymentMethodEntity{
     mpesa
 }

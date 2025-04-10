@@ -1,19 +1,15 @@
-package com.taptag.project.sources.remote.dtos
+package com.taptag.project.sources.local.room.entities
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.taptag.project.domain.models.ContactStatus
 import com.taptag.project.domain.models.EventType
 import com.taptag.project.domain.models.RelationshipStrength
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class ContactsRequestData(
-    val name: String,
-    val email: String,
-    val notes: String
-)
 
-@Serializable
-data class ContactsResponseData(
+@Entity(tableName = "contact")
+data class ContactsResponseEntity(
+    @PrimaryKey
     val id: String,
     val name: String,
     val email: String,
@@ -23,8 +19,9 @@ data class ContactsResponseData(
     val updatedAt: String,
 )
 
-@Serializable
-data class ContactData(
+@Entity(tableName = "contact")
+data class ContactEntity(
+    @PrimaryKey
     val id: Int,
     val name: String,
     val email: String,
@@ -38,11 +35,11 @@ data class ContactData(
     val notes: String,
     val nextFollowUp: String?,
     val scheduledDate: String?,
-    val history: List<ContactEventDTO>
+    val history: List<ContactEventEntity>
 )
 
-@Serializable
-data class ContactEventDTO(
+@Entity
+data class ContactEventEntity(
     val date: String,
     val type: EventType,
     val details: String

@@ -1,6 +1,7 @@
 package com.taptag.project.data.nfcManager
 
 import android.app.Activity
+import android.content.Context
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
@@ -11,8 +12,10 @@ import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.taptag.project.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -113,9 +116,6 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
         Log.d(TAG, "Prepared to write data: $data, isWriteMode set to: $isWriteMode")
     }
 
-    /**
-     * Cancels any pending write operation
-     */
     actual fun cancelWrite() {
 
         scope.launch {

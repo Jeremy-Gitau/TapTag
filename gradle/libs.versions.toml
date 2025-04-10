@@ -31,9 +31,13 @@ material3 = "1.7.0"
 #material icons extended
 materialIconsExtended = "1.7.8"
 #datastore
-datastore ="1.1.4"
+datastore = "1.1.4"
 # thread safe singleton
 atomicfu = "0.23.2"
+# room
+roomRuntime = "2.7.0"
+sqlite= "2.5.0-alpha08"
+ksp = "2.0.21-1.0.27"
 
 [libraries]
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -60,7 +64,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
-voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager"}
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 #datetime
@@ -77,12 +81,16 @@ androidx-material3 = { module = "org.jetbrains.compose.material3:material3", ver
 #material icons extended
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 #datastore
-datastore-preferences ={ module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu"}
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
+#room
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 [bundles]
 voyager = ["voyager-navigator", "voyager-screenmodel", "voyager-koin"]
-ktor = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json",  ]
+ktor = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", ]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -91,3 +99,5 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "roomRuntime" }
