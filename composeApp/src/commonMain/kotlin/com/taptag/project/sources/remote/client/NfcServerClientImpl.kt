@@ -80,6 +80,21 @@ class NfcServerClientImpl(
             userResponse
         }
 
+    override suspend fun logout(token: String): NetworkResult<Boolean> =
+        safeApiCall {
+            val response: HttpResponse = client.post(
+                Endpoints.LogOut.url
+            ) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                bearerAuth(token = token)
+            }
+
+            client.close()
+
+            true
+        }
+
     override suspend fun saveNewContact(
         data: ContactsRequestData,
         token: String
@@ -115,8 +130,8 @@ class NfcServerClientImpl(
                 bearerAuth(token = token)
             }
 
-            if (response.status.value == 401){
-                NetworkResult.Error(message ="User not authenticated")
+            if (response.status.value == 401) {
+                NetworkResult.Error(message = "User not authenticated")
             }
 
             val contactResponse: List<ContactData> = json.decodeFromString(

@@ -4,7 +4,6 @@ import com.taptag.project.domain.models.ContactDomain
 import com.taptag.project.domain.models.ContactEvent
 import com.taptag.project.domain.models.ContactsRequestDomain
 import com.taptag.project.domain.models.ContactsResponseDomain
-import com.taptag.project.sources.local.room.entities.ContactEventEntity
 import com.taptag.project.sources.remote.dtos.ContactData
 import com.taptag.project.sources.remote.dtos.ContactEventDTO
 import com.taptag.project.sources.remote.dtos.ContactsRequestData
@@ -23,7 +22,10 @@ fun ContactsResponseData.toDomain() = ContactsResponseDomain(
 fun ContactsRequestDomain.toDto() = ContactsRequestData(
     name = this.name,
     email = this.email,
-    notes = this.notes
+    notes = this.notes,
+    phone = this.phone,
+    company = this.company,
+    tags = this.tags
 )
 
 fun ContactData.toDomain() = ContactDomain(

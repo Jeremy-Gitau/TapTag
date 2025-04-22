@@ -5,6 +5,7 @@ import com.taptag.project.domain.models.AuthResponseDomain
 import com.taptag.project.domain.models.CurrentUserDomain
 import com.taptag.project.domain.models.RefreshTokenRequestDomain
 import com.taptag.project.domain.models.RefreshTokenResponseDomain
+import com.taptag.project.sources.local.room.entities.UserEntity
 import com.taptag.project.sources.remote.dtos.AuthRequestData
 import com.taptag.project.sources.remote.dtos.AuthResponseData
 import com.taptag.project.sources.remote.dtos.RefreshTokenRequestData
@@ -43,4 +44,25 @@ fun RefreshTokenResponseData.toDomain() =
 fun RefreshTokenRequestDomain.toDto() = RefreshTokenRequestData(
     refreshToken = this.refreshToken
 )
+
+fun AuthResponseData.toEntity() = UserEntity(
+    id = this.user.id,
+    firstName = this.user.firstName,
+    lastName = this.user.lastName,
+    email = this.user.email,
+    accessToken = this.accessToken,
+    refreshToken = this.refreshToken
+)
+
+fun UserEntity.toDomain(): AuthResponseDomain = AuthResponseDomain(
+        accessToken = this.accessToken,
+        refreshToken = this.refreshToken,
+        user = CurrentUserDomain(
+            id = this.id,
+            firstName = this.firstName,
+            secondName = this.lastName,
+            email = this.email
+        )
+    )
+
 

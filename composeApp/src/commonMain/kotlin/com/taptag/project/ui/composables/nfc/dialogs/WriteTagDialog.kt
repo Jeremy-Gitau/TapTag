@@ -1,4 +1,4 @@
-package com.taptag.project.ui.composables.nfc
+package com.taptag.project.ui.composables.nfc.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

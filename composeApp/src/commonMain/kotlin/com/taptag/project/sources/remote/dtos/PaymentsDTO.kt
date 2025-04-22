@@ -4,7 +4,7 @@ import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
 @Entity(tableName = "payment")
-data class PaymentsRequestEntity(
+data class PaymentsRequestData(
     val amount: Int,
     val paymentMethod: PaymentMethodEntity
 )

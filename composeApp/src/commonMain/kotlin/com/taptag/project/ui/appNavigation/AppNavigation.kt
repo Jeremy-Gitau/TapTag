@@ -9,7 +9,7 @@ import com.taptag.project.ui.screens.home.HomeScreen
 @Composable
 fun AppNavigation() {
 
-    Navigator(HomeScreen()) { navigator ->
+    Navigator(SignInScreen()) { navigator ->
         SlideTransition(navigator)
     }
 

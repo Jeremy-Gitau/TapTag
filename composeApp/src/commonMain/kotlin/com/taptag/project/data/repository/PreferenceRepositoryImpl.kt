@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class PreferenceRepositoryImpl(
     private val preferenceManager: AppPreferenceManager
-): PreferenceRepository {
+) : PreferenceRepository {
 
     override val isDarkModeEnabled: Flow<Boolean>
         get() = preferenceManager.isDarkModeEnabled
@@ -23,6 +23,10 @@ class PreferenceRepositoryImpl(
         return preferenceManager.saveRefreshToken(token = token)
     }
 
+    override suspend fun saveUserId(userId: String): Boolean {
+        return preferenceManager.saveUserId(userId = userId)
+    }
+
     override suspend fun readAccessToken(): Flow<String> {
         return preferenceManager.readAccessToken()
     }
@@ -31,12 +35,20 @@ class PreferenceRepositoryImpl(
         return preferenceManager.readRefreshToken()
     }
 
-    override suspend fun deleteAccessToken(){
+    override suspend fun readUserId(): Flow<String> {
+        return preferenceManager.readUserId()
+    }
+
+    override suspend fun deleteAccessToken() {
         preferenceManager.deleteAccessToken()
     }
 
-    override suspend fun deleteRefreshToken(){
+    override suspend fun deleteRefreshToken() {
         preferenceManager.deleteRefreshToken()
+    }
+
+    override suspend fun deleteUserId() {
+        return preferenceManager.deleteUserId()
     }
 
     override suspend fun clearAllPreferences() {

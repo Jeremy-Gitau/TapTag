@@ -9,7 +9,10 @@ import kotlinx.serialization.Serializable
 data class ContactsRequestData(
     val name: String,
     val email: String,
-    val notes: String
+    val phone: String,
+    val notes: String,
+    val company: String,
+    val tags: List<String>
 )
 
 @Serializable

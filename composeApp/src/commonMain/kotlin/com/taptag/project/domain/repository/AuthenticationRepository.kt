@@ -11,6 +11,15 @@ import com.taptag.project.sources.remote.dtos.RefreshTokenResponseData
 interface AuthenticationRepository {
 
     suspend fun registerUser(data: AuthRequestDomain): DataResult<AuthResponseDomain>
+
     suspend fun loginUser(data: AuthRequestDomain): DataResult<AuthResponseDomain>
+
+    suspend fun getCachedUser(userId: String): DataResult<AuthResponseDomain?>
+
+    suspend fun refreshToken(data: RefreshTokenRequestDomain): DataResult<RefreshTokenResponseDomain>
+
+    suspend fun clearUserData(id: String)
+
+    suspend fun logoutUser(token: String): DataResult<Boolean>
 
 }

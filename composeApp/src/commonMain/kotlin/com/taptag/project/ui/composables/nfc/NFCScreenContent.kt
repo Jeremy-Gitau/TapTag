@@ -1,195 +1,122 @@
 package com.taptag.project.ui.composables.nfc
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PhoneIphone
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Nfc
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
-import com.taptag.project.ui.screens.NFCScreen.NFCState
-import com.taptag.project.ui.screens.NFCScreen.ReadNfcScreen
-import com.taptag.project.ui.theme.NFCScannerTheme
+import com.taptag.project.ui.screens.NFCScreen.NFCReadScreen
+import com.taptag.project.ui.screens.NFCScreen.NFCWriteScreen
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NFCScreenContent(
-    nfcScreenModel: NFCScreenModel,
-    state: NFCState,
-    isScanning: Boolean,
-    onClickStartScanning: () -> Unit,
-    pulseAnimation: State<Float>,
-    iconOpacity: State<Float>
-) {
+fun NFCHomeScreenContent() {
     val navigator = LocalNavigator.currentOrThrow
 
-    if (state.showResultDialog) {
-        state.nfcResult?.let {
-            SuccessContent(
-                onViewContactClick = {
-                    navigator.parent?.push(ReadNfcScreen())
-                    nfcScreenModel.isScanning(false)
-                    nfcScreenModel.toggleResultDialog(false)
-                },
-                onDismiss = {
-                    nfcScreenModel.toggleResultDialog(false)
-                }
-            )
-        }
+    val cardColors = remember {
+        listOf(
+            Color(0xFF4285F4),
+            Color(0xFFEA4335),
+            Color(0xFFFBBC05),
+            Color(0xFF34A853),
+            Color(0xFF9C27B0),
+            Color(0xFF00BCD4),
+            Color(0xFFFF5722)
+        ).shuffled()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(state = rememberScrollState())
-    ) {
+    val cardItems = remember(cardColors) {
+        listOf(
+            NFCActionCard(
+                title = "Read Tag",
+                icon = Icons.Outlined.Nfc,
+                color = cardColors[0],
+                onClick = { navigator.parent?.push(NFCReadScreen()) }
+            ),
+            NFCActionCard(
+                title = "Write Tag",
+                icon = Icons.Outlined.Edit,
+                color = cardColors[1],
+                onClick = {
+                    navigator.parent?.push(NFCWriteScreen())
+                }
+            )
+        )
+    }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "TapTag NFC Manager",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
+            )
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
         ) {
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                Text(
-                    text = "Scan & Connect",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge
-                )
-
-                Text(
-                    text = "Scan an NFC tag " +
-//                                    "or QR code " +
-                            "to connect",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-
-            }
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .size(330.dp)
-            ) {
-                if (isScanning) {
-                    Box(
-                        modifier = Modifier
-                            .size(200.dp * pulseAnimation.value)
-                            .alpha(2f - pulseAnimation.value)
-                            .clip(CircleShape)
-                            .border(
-                                width = 4.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                                shape = CircleShape
-                            )
-                    )
-
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(200.dp)
-                        .clip(CircleShape)
-                        .border(
-                            width = 4.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
-                        ), contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Outlined.PhoneIphone,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(200.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                shape = CircleShape
-                            )
-                            .padding(16.dp)
-                            .alpha(if (isScanning) iconOpacity.value else 1f),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+            HorizontalDivider()
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-
                 Text(
-                    text = "Scan New Contact",
+                    text = "Choose an NFC Action",
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineMedium
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Text(
-                    text = "Tap the Phone with the NFC tag to scan",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        if (state.isScanning) {
-                            nfcScreenModel.isScanning(false)
-                        } else {
-                            onClickStartScanning()
-                        }
-                    }, colors = ButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = NFCScannerTheme.PrimaryGreenLighter,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(if (state.isScanning) "Stop Scanning" else "Start Scanning")
+                    items(cardItems) { card ->
+                        NFCActionCardItem(card)
+                    }
                 }
-
             }
         }
-
     }
 }

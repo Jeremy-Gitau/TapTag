@@ -42,11 +42,11 @@ class SignUpScreen : Screen {
         if (authState.error != null) {
 
             AlertDialog(
-                onDismissRequest = { dismiss = false },
+                onDismissRequest = { authenticationScreenModel.toggleErrorDialog(false) },
                 confirmButton = {
 
                     Button(
-                        onClick = { dismiss = false}
+                        onClick = { authenticationScreenModel.toggleErrorDialog(false) }
                     ) {
                         Text(
                             text = "Okay"

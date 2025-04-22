@@ -11,7 +11,6 @@ class NFCApplication: Application(){
         super.onCreate()
 
         initKoin {
-            androidLogger(Level.ERROR)
             androidContext(this@NFCApplication)
         }
     }

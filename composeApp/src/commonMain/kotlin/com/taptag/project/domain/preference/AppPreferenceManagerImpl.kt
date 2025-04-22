@@ -1,14 +1,13 @@
 package com.taptag.project.domain.preference
 
 import androidx.datastore.core.IOException
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.taptag.project.sources.local.preference.PreferenceSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
-class PreferenceManagerImpl(
+class AppPreferenceManagerImpl(
     private val source: PreferenceSource
 ) : AppPreferenceManager {
 
@@ -16,6 +15,7 @@ class PreferenceManagerImpl(
         val darkMode = booleanPreferencesKey(name = "dark_mode")
         val accessToken = stringPreferencesKey(name = "access_token")
         val refreshToken = stringPreferencesKey(name = "refresh_token")
+        val USERID = stringPreferencesKey(name = "user_id")
     }
 
     override val isDarkModeEnabled: Flow<Boolean>
@@ -45,13 +45,27 @@ class PreferenceManagerImpl(
             false
         }
 
+    override suspend fun saveUserId(userId: String): Boolean =
+        try {
+            source.save(USERID, userId)
+            true
+        } catch (e: Exception) {
+            println("saveUserId error: ${e.message}")
+            false
+        }
+
+
     override suspend fun readAccessToken(): Flow<String> =
         source.get(accessToken, defaultValue = "")
 
     override suspend fun readRefreshToken(): Flow<String> =
         source.get(refreshToken, defaultValue = "")
 
-    override suspend fun deleteAccessToken(){
+    override suspend fun readUserId(): Flow<String> =
+        source.get(USERID, defaultValue = "")
+
+
+    override suspend fun deleteAccessToken() {
         try {
             source.delete(accessToken)
         } catch (e: IOException) {
@@ -59,12 +73,16 @@ class PreferenceManagerImpl(
         }
     }
 
-    override suspend fun deleteRefreshToken(){
+    override suspend fun deleteRefreshToken() {
         try {
             source.delete(refreshToken)
         } catch (e: IOException) {
             println(e.message)
         }
+    }
+
+    override suspend fun deleteUserId() {
+        source.delete(USERID)
     }
 
     override suspend fun clearAllPreferences() {

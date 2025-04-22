@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,7 +51,7 @@ fun SignUpContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF9FAFB))
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -81,13 +82,14 @@ fun SignUpContent(
             Text(
                 text = "Create an account",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
                 text = "Enter your information to get started with digital business cards",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
@@ -157,7 +159,7 @@ fun SignUpContent(
                 Text(
                     text = "I agree to the terms of service and privacy policy",
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -179,7 +181,7 @@ fun SignUpContent(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF10B981)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text("Create account")
@@ -194,7 +196,7 @@ fun SignUpContent(
                 Text(
                     "Already have an account? ",
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(
                     onClick = { navigate.push(SignInScreen()) }
@@ -202,7 +204,7 @@ fun SignUpContent(
                     Text(
                         "Sign in",
                         fontSize = 14.sp,
-                        color = Color(0xFF10B981),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }

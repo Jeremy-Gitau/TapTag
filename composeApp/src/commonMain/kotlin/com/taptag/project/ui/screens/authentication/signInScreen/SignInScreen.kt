@@ -24,6 +24,10 @@ class SignInScreen() : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
+        LaunchedEffect(Unit) {
+            userScreenModel.validateSession()
+        }
+
         LaunchedEffect(userState.isAuthenticated) {
             if (userState.isAuthenticated) {
                 navigator.push(HomeScreen())

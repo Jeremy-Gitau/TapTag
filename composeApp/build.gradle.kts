@@ -19,16 +19,16 @@ kotlin {
         }
     }
 
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "ComposeApp"
+//            isStatic = true
+//        }
+//    }
 
     sourceSets {
 
@@ -40,6 +40,8 @@ kotlin {
 
             implementation(libs.ktor.client.android)
             implementation(libs.ktor.client.cio)
+
+            implementation(libs.gson)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -78,9 +80,9 @@ kotlin {
 
         }
 
-        iosMain.dependencies {
-
-        }
+//        iosMain.dependencies {
+//
+//        }
     }
 }
 

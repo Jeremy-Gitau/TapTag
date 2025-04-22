@@ -1,5 +1,6 @@
 package com.taptag.project.sources.local.room.entities
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.taptag.project.domain.models.ContactStatus
@@ -8,21 +9,8 @@ import com.taptag.project.domain.models.RelationshipStrength
 
 
 @Entity(tableName = "contact")
-data class ContactsResponseEntity(
-    @PrimaryKey
-    val id: String,
-    val name: String,
-    val email: String,
-    val notes: String,
-    val userId: String,
-    val createdAt: String,
-    val updatedAt: String,
-)
-
-@Entity(tableName = "contact")
 data class ContactEntity(
-    @PrimaryKey
-    val id: Int,
+    @PrimaryKey val id: Int,
     val name: String,
     val email: String,
     val role: String,
@@ -35,7 +23,7 @@ data class ContactEntity(
     val notes: String,
     val nextFollowUp: String?,
     val scheduledDate: String?,
-    val history: List<ContactEventEntity>
+//    @Embedded(prefix = ("contact_event_type")) val history: List<ContactEventEntity>
 )
 
 @Entity

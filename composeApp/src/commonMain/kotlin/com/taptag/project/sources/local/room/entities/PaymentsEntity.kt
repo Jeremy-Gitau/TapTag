@@ -1,9 +1,9 @@
-package com.taptag.project.sources.remote.dtos
+package com.taptag.project.sources.local.room.entities
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PaymentsRequestData(
+data class PaymentsRequestEntity(
     val amount: Int,
     val paymentMethod: PaymentMethod
 )

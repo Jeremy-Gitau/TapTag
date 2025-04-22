@@ -1,5 +1,7 @@
 package com.taptag.project.sources.remote.helpers
 
+import androidx.compose.ui.platform.InspectableModifier
+
 sealed class Endpoints(private val path: String) {
 
     private val baseUrl = "https://nfc-contact-app-06c90874a73f.herokuapp.com/api/"
@@ -10,6 +12,8 @@ sealed class Endpoints(private val path: String) {
     data object RegisterUser: Endpoints("auth/register/")
 
     data object LoginUser: Endpoints("auth/login")
+
+    data object LogOut: Endpoints("auth/logout")
 
     data object GetAllContacts: Endpoints("contacts")
 

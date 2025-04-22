@@ -15,7 +15,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.taptag.project.MainActivity
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.taptag.project.domain.models.ContactDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,13 +35,18 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
 
     private var nfcAdapter: NfcAdapter? = null
     private val _tagData = MutableSharedFlow<String>()
+    private val _contactData = MutableSharedFlow<ContactDomain>()
     private val _writeResult = MutableSharedFlow<Boolean>()
     private val scope = CoroutineScope(SupervisorJob())
+    private val gson: Gson = GsonBuilder().create()
+
     actual val tags: SharedFlow<String> = _tagData
+    actual val contacts: SharedFlow<ContactDomain> = _contactData
     actual val writeResult: SharedFlow<Boolean> = _writeResult
 
     // Data to write to the next detected tag
     private var pendingWriteData: String? = null
+    private var pendingContactData: ContactDomain? = null
     private var isWriteMode: Boolean = false
 
     @Composable
@@ -71,12 +79,13 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
         }
 
         Log.d(TAG, "Tag discovered: ${tag.id?.joinToString(", ")}")
-        Log.d(TAG, "Write mode is: $isWriteMode, pending data: $pendingWriteData")
+        Log.d(TAG, "Write mode is: $isWriteMode, pending data: ${pendingWriteData?.take(50)}")
 
         // If in write mode, attempt to write data to the tag
-        if (isWriteMode == true && pendingWriteData != null) {
+        if (isWriteMode && (pendingWriteData != null || pendingContactData != null)) {
             Log.d(TAG, "Attempting to write data to tag")
-            val success = writeToTag(tag, pendingWriteData.toString())
+            val dataToWrite = pendingWriteData ?: pendingContactData?.let { gson.toJson(it) } ?: ""
+            val success = writeToTag(tag, dataToWrite)
             scope.launch {
                 _writeResult.emit(success)
             }
@@ -85,9 +94,9 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
             if (success) {
                 scope.launch {
                     isWriteMode = false
-                    pendingWriteData = ""
+                    pendingWriteData = null
+                    pendingContactData = null
                 }
-
             }
             return
         }
@@ -107,19 +116,33 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
      * @param data The string data to write to the tag
      */
     actual fun prepareWrite(data: String) {
-
         scope.launch {
             pendingWriteData = data
+            pendingContactData = null
             isWriteMode = true
         }
 
-        Log.d(TAG, "Prepared to write data: $data, isWriteMode set to: $isWriteMode")
+        Log.d(TAG, "Prepared to write data: ${data.take(50)}, isWriteMode set to: $isWriteMode")
+    }
+
+    /**
+     * Prepares the manager to write contact data to the next detected tag
+     * @param contact The contact data to write to the tag
+     */
+    actual fun prepareWriteContact(contact: ContactDomain) {
+        scope.launch {
+            pendingContactData = contact
+            pendingWriteData = null
+            isWriteMode = true
+        }
+
+        Log.d(TAG, "Prepared to write contact: ${contact.name}, isWriteMode set to: $isWriteMode")
     }
 
     actual fun cancelWrite() {
-
         scope.launch {
-            pendingWriteData = ""
+            pendingWriteData = null
+            pendingContactData = null
             isWriteMode = false
         }
 
@@ -293,9 +316,27 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
 
         if (records.isNotEmpty()) {
             records.forEach { record ->
-                val payload = String(record.payload, Charsets.UTF_8)
+                // Skip the language code (first 3 characters)
+                val payload = String(record.payload, Charsets.UTF_8).drop(3)
+
+                // Emit raw tag data
                 scope.launch {
                     _tagData.emit(payload)
+                }
+
+                // Try to parse as ContactDomain
+                try {
+                    val type = object : TypeToken<ContactDomain>() {}.type
+                    val contact = gson.fromJson<ContactDomain>(payload, type)
+
+                    // Only emit valid contacts (with at least a name or email)
+                    if (contact.name.isNotBlank() || contact.email.isNotBlank()) {
+                        scope.launch {
+                            _contactData.emit(contact)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.d(TAG, "Payload is not in ContactDomain format: ${e.message}")
                 }
             }
         } else {
@@ -345,12 +386,52 @@ actual open class NFCManager : NfcAdapter.ReaderCallback {
 
             try {
                 tagData.append("Data: ")
-                for (i in 0 until ULTRALIGHT_PAGES_TO_READ) {
+
+                // Read more pages to try capturing more data
+                for (i in 0 until ULTRALIGHT_PAGES_TO_READ * 2) {
                     val page = mifareUltralight.readPages(i)
-                    tagData.append(bytesToHex(page))
+
+                    // Try to convert to string in case it's plain text
+                    val pageString = String(page, Charset.forName("UTF-8"))
+                    if (pageString.any { it.isLetterOrDigit() }) {
+                        tagData.append(pageString)
+                    } else {
+                        tagData.append(bytesToHex(page))
+                    }
                     tagData.append(" ")
                 }
                 tagData.append("\n")
+
+                // Try to extract full data from multiple pages
+                try {
+                    val fullData = StringBuilder()
+                    for (i in 4 until 20) { // Start at page 4 where user data typically begins
+                        val page = mifareUltralight.readPages(i)
+                        fullData.append(String(page, Charset.forName("UTF-8")))
+                    }
+
+                    val dataString = fullData.toString().trim { it <= ' ' || it.code == 0 }
+
+                    // Try parsing as contact
+                    try {
+                        val type = object : TypeToken<ContactDomain>() {}.type
+                        val contact = gson.fromJson<ContactDomain>(dataString, type)
+
+                        if (contact.name.isNotBlank() || contact.email.isNotBlank()) {
+                            scope.launch {
+                                _contactData.emit(contact)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Not a contact, just emit the raw data
+                        scope.launch {
+                            _tagData.emit(dataString)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error reading full Mifare Ultralight data", e)
+                }
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error reading Mifare Ultralight pages", e)
             }

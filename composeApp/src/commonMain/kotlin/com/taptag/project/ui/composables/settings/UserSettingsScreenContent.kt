@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
+import com.taptag.project.ui.screens.authentication.UserScreenModel
 import com.taptag.project.ui.screens.authentication.UserState
+import com.taptag.project.ui.screens.authentication.signInScreen.SignInScreen
 import com.taptag.project.ui.screens.settings.SettingsScreenModel
 import com.taptag.project.ui.screens.settings.SettingsState
 
@@ -52,8 +55,15 @@ fun UserSettingsScreenContent(
     navigator: Navigator, settingsState: SettingsState, settingsScreenModel: SettingsScreenModel,
     onClickLogOut: () -> Unit,
     onDismiss: (Boolean) -> Unit,
-    userState: UserState
+    userState: UserState,
+    authenticationScreenModel: UserScreenModel
 ) {
+
+    LaunchedEffect(userState.isAuthenticated) {
+        if (!userState.isAuthenticated){
+            navigator.push(SignInScreen())
+        }
+    }
 
     val isDarkTheme = settingsState.isDarkMode.collectAsState(initial = isSystemInDarkTheme()).value
 
@@ -61,38 +71,39 @@ fun UserSettingsScreenContent(
 
         topBar = {
 
-            TopAppBar(title = {
-                Text(
-                    text = "Settings",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }, navigationIcon = {
-                IconButton(onClick = {
-                    navigator.pop()
-                }) {
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = "settings nav icon"
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Settings",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium
                     )
-                }
-            }, actions = {
+                }, navigationIcon = {
+                    IconButton(onClick = {
+                        navigator.pop()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBackIosNew,
+                            contentDescription = "settings nav icon"
+                        )
+                    }
+                }, actions = {
 
-                IconButton(onClick = {
-                    settingsScreenModel.toggleDarkMode()
-                }) {
-                    Icon(
-                        imageVector = if (!isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                        contentDescription = "theme icon"
-                    )
-                }
-            }, colors = TopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                scrolledContainerColor = MaterialTheme.colorScheme.background,
-            )
+                    IconButton(onClick = {
+                        settingsScreenModel.toggleDarkMode()
+                    }) {
+                        Icon(
+                            imageVector = if (!isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "theme icon"
+                        )
+                    }
+                }, colors = TopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
+                )
             )
         }) { padding ->
         Box(
@@ -102,10 +113,15 @@ fun UserSettingsScreenContent(
             contentAlignment = Alignment.TopCenter
         ) {
 
-            if (userState.toggleLogOutDialog){
+            if (userState.toggleLogOutDialog) {
                 LogOutDialog(
                     onDismiss = { onDismiss(false) },
-                    onLogOutClicked = { onClickLogOut() }
+                    onLogOutClicked = {
+                        onClickLogOut()
+                        if (!userState.isAuthenticated) {
+                            navigator.push(SignInScreen())
+                        }
+                    }
                 )
             }
 
@@ -137,11 +153,13 @@ fun UserSettingsScreenContent(
                                 disabledContentColor = MaterialTheme.colorScheme.background,
                             )
                         ) {
-                            SettingsCard(text = "Profile Info",
+                            SettingsCard(
+                                text = "Profile Info",
                                 icon = Icons.Outlined.Person,
-                                onNavigatorClicked = {})
+                                onNavigatorClicked = {navigator.push(UserProfileScreen())})
 
-                            SettingsCard(text = "Change Password",
+                            SettingsCard(
+                                text = "Change Password",
                                 icon = Icons.Default.Password,
                                 onNavigatorClicked = {})
 
@@ -162,7 +180,7 @@ fun UserSettingsScreenContent(
                                 icon = Icons.AutoMirrored.Filled.Logout,
                                 onNavigatorClicked = {
 
-                                    onDismiss(true)
+                                    authenticationScreenModel.toggleLogOutDialog(true)
                                 })
                         }
                     }
@@ -231,7 +249,7 @@ fun SettingsCard(
 fun LogOutDialog(
     onDismiss: () -> Unit,
     onLogOutClicked: () -> Unit
-){
+) {
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -240,7 +258,7 @@ fun LogOutDialog(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
-            ){
+            ) {
                 IconButton(onClick = { onDismiss() }) {
                     Icon(
                         imageVector = Icons.Default.Close,

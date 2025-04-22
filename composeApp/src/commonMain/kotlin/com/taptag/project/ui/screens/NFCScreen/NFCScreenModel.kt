@@ -1,6 +1,7 @@
 package com.taptag.project.ui.screens.NFCScreen
 
 import cafe.adriel.voyager.core.model.StateScreenModel
+import com.taptag.project.domain.models.ContactDomain
 import kotlinx.coroutines.flow.update
 import org.koin.core.logger.MESSAGE
 
@@ -14,7 +15,10 @@ data class NFCState(
     val isWriteMode: Boolean = false,
     val writeStatus: String = "",
     val isSuccess: Boolean = false,
-    val message: String = ""
+    val message: String = "",
+    val writeResult: Boolean? = null,
+    val currentContact: ContactDomain = ContactDomain(),
+    val lastScannedContact: ContactDomain? = null
 )
 
 class NFCScreenModel : StateScreenModel<NFCState>(initialState = NFCState()) {
@@ -32,6 +36,14 @@ class NFCScreenModel : StateScreenModel<NFCState>(initialState = NFCState()) {
         mutableState.update {
             it.copy(
                 showWriteDialog = state
+            )
+        }
+    }
+
+    fun toggleWriteResult(state: Boolean? = null) {
+        mutableState.update {
+            it.copy(
+                writeResult = state
             )
         }
     }
@@ -64,11 +76,36 @@ class NFCScreenModel : StateScreenModel<NFCState>(initialState = NFCState()) {
         }
     }
 
+    fun observeCurrentContact(contact: ContactDomain){
+        mutableState.update {
+            it.copy(
+                currentContact = contact
+            )
+        }
+    }
+
+    fun observeLastScannedContact(contact: ContactDomain){
+        mutableState.update {
+            it.copy(
+                lastScannedContact = contact
+            )
+        }
+    }
+
     fun readTag(tagData: String) {
 
         mutableState.update {
             it.copy(
                 nfcResult = tagData
+            )
+        }
+    }
+
+    fun readTagContact(tagData: ContactDomain) {
+
+        mutableState.update {
+            it.copy(
+                currentContact = tagData
             )
         }
     }

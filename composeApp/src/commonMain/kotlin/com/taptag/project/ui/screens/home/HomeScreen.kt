@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.PhoneIphone
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -19,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.ui.screens.NFCScreen.NFCScreen
 import com.taptag.project.ui.screens.analytics.DashboardScreen
@@ -77,7 +79,7 @@ class HomeScreen : Screen {
                 }
             ) {
                 // The current screen will be rendered here
-                navigator.lastItem.Content()
+                CurrentScreen()
             }
         }
     }
