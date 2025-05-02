@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.domain.models.AuthRequestDomain
+import com.taptag.project.domain.models.UserProfileDomain
+import com.taptag.project.ui.screens.authentication.UserScreenModel
 import com.taptag.project.ui.screens.authentication.UserState
 import com.taptag.project.ui.screens.authentication.signInScreen.SignInScreen
 import kotlin.reflect.KFunction1
@@ -38,7 +39,8 @@ import kotlin.reflect.KFunction1
 fun SignUpContent(
     onClickSignUp: KFunction1<AuthRequestDomain, Unit>,
     state: UserState,
-    navigate: Navigator
+    navigate: Navigator,
+    userScreenModel: UserScreenModel
 ) {
     var firstName by remember { mutableStateOf("") }
     var secondName by remember { mutableStateOf("") }
@@ -62,21 +64,6 @@ fun SignUpContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Logo Circle
-//            Box(
-//                modifier = Modifier
-//                    .size(64.dp)
-//                    .clip(CircleShape)
-//                    .background(Color(0xFF10B981)),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Person,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.size(32.dp)
-//                )
-//            }
 
             // Header
             Text(
@@ -167,16 +154,19 @@ fun SignUpContent(
             // Sign Up Button
             Button(
                 onClick = {
+
+                    val data = AuthRequestDomain(
+                        firstName = firstName,
+                        secondName = secondName,
+                        company = company,
+                        email = email,
+                        workEmail = email,
+                        password = password,
+                        confirmPassword = confirmPassword
+                    )
+
                     onClickSignUp(
-                        AuthRequestDomain(
-                            firstName = firstName,
-                            secondName = secondName,
-                            company = company,
-                            email = email,
-                            workEmail = email,
-                            password = password,
-                            confirmPassword = confirmPassword
-                        )
+                        data
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),

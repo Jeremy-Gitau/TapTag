@@ -3,10 +3,13 @@ package com.taptag.project.ui.composables.contact
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +21,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Circle
@@ -26,10 +28,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,15 +43,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
+import com.taptag.project.data.platformShareHandler.getPlatformShareHandler
 import com.taptag.project.domain.models.ContactDomain
 import com.taptag.project.domain.models.ContactStatus
-import com.taptag.project.domain.models.RelationshipStrength
+import com.taptag.project.ui.common.ProfileImage
 import com.taptag.project.ui.screens.NFCScreen.NFCScreen
-import com.taptag.project.ui.theme.NFCScannerTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -62,6 +64,9 @@ fun ContactItem(
     onExpandToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+//    val shareHandler = getPlatformShareHandler()
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -76,17 +81,22 @@ fun ContactItem(
             // Avatar and basic info
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Avatar image
-                Box(modifier = Modifier.wrapContentSize()) {
+                Box(modifier = Modifier.size(64.dp)) {
 //                    Image(
-//                        painter = rememberImagePainter(
-//                            data = contact.avatarUrl
-//                        ),
+//                        painter =  contact.avatarUrl,
 //                        contentDescription = "Avatar for ${contact.name}",
 //                        modifier = Modifier
 //                            .size(48.dp)
 //                            .clip(CircleShape),
 //                        contentScale = ContentScale.Crop
 //                    )
+
+                    ProfileImage(
+                        text = contact.name.take(2)
+                            .uppercase()
+                            .toString(),
+                        editImage = false
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -100,21 +110,14 @@ fun ContactItem(
                                 fontWeight = FontWeight.SemiBold
                             )
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = getRelationshipIcon(contact.relationshipStrength),
-                            contentDescription = "Relationship Strength",
-                            modifier = Modifier.size(16.dp),
-                            tint = getRelationshipColor(contact.relationshipStrength)
-                        )
                     }
                     Text(
                         text = "${contact.role} • ${contact.company}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    // Tags row - match React implementation
+                    // Tags row
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 4.dp)
@@ -138,11 +141,9 @@ fun ContactItem(
                                     )
                                     Spacer(modifier = Modifier.width(2.dp))
                                     Text(
-                                        text = tag,
-                                        style = MaterialTheme.typography.bodySmall.copy(
+                                        text = tag, style = MaterialTheme.typography.bodySmall.copy(
                                             fontSize = 10.sp
-                                        ),
-                                        color = Color.Gray
+                                        ), color = Color.Gray
                                     )
                                 }
                             }
@@ -194,50 +195,7 @@ fun ContactItem(
                         modifier = Modifier.size(12.dp),
                         tint = Color.Gray
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Last contact: ${contact.lastContact}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
-                }
 
-                if (contact.scheduledDate != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.CalendarToday,
-                            contentDescription = "Meeting",
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Magenta
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Meeting: ${contact.scheduledDate}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Magenta
-                        )
-                    }
-                } else if (contact.nextFollowUp != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Notifications,
-                            contentDescription = "Follow-up",
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Yellow
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Follow up by: ${formatDate(contact.nextFollowUp)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Yellow
-                        )
-                    }
                 }
             }
 
@@ -246,12 +204,12 @@ fun ContactItem(
                 OutlinedButton(
                     onClick = { /* Phone action */ },
                     modifier = Modifier.size(32.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.Green
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray)
+                    border = BorderStroke(1.dp, Color.LightGray)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Phone,
@@ -264,14 +222,16 @@ fun ContactItem(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 OutlinedButton(
-                    onClick = { /* Message action */ },
+                    onClick = {
+//                        shareHandler.sendSms(contact.phone)
+                    },
                     modifier = Modifier.size(32.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.Green
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray)
+                    border = BorderStroke(1.dp, Color.LightGray)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ChatBubbleOutline,
@@ -286,12 +246,12 @@ fun ContactItem(
                 OutlinedButton(
                     onClick = onExpandToggle,
                     modifier = Modifier.size(32.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.Gray
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray)
+                    border = BorderStroke(1.dp, Color.LightGray)
                 ) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
@@ -305,9 +265,7 @@ fun ContactItem(
 
         // Expanded content
         AnimatedVisibility(
-            visible = isExpanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+            visible = isExpanded, enter = expandVertically(), exit = shrinkVertically()
         ) {
             Column(
                 modifier = Modifier
@@ -330,55 +288,6 @@ fun ContactItem(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Contact history
-                if (contact.history.isNotEmpty()) {
-                    Text(
-                        text = "Relationship Timeline",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Display contact history
-                    contact.history.forEach { event ->
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        ) {
-                            // Timeline dot
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .padding(top = 6.dp)
-                                    .background(Color.Green, CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = event.type.toString().lowercase()
-                                            .replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
-                                    )
-                                    Text(
-                                        text = event.date,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                                Text(
-                                    text = event.details,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Gray
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                }
-
                 // Action buttons
                 Row(
                     modifier = Modifier
@@ -395,22 +304,19 @@ fun ContactItem(
                         modifier = Modifier.height(28.dp)
                     ) {
                         Text(
-                            "Snooze Follow-up",
-                            style = MaterialTheme.typography.bodySmall
+                            "Snooze Follow-up", style = MaterialTheme.typography.bodySmall
                         )
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Button(
-                        onClick = { /* Schedule action */ },
-                        colors = ButtonDefaults.buttonColors(
+                        onClick = { /* Schedule action */ }, colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Green
-                        ),
-                        modifier = Modifier.height(28.dp)
+                        ), modifier = Modifier.height(28.dp)
                     ) {
                         Text(
-                            text = if (contact.scheduledDate != null) "Add Meeting Notes" else "Schedule Meeting",
+                            text =  "Add Meeting Notes" ,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -421,15 +327,14 @@ fun ContactItem(
         // Add divider between contacts
         if (!isExpanded) {
             HorizontalDivider(
-                modifier = Modifier.padding(top = 8.dp),
-                color = Color.LightGray.copy(alpha = 0.5f)
+                modifier = Modifier.padding(top = 8.dp), color = Color.LightGray.copy(alpha = 0.5f)
             )
         }
     }
 }
 
 @Composable
-fun EmptyContactsView(navigator: Navigator, startScanning: @Composable () -> Unit) {
+fun EmptyContactsView(navigator: Navigator) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -472,31 +377,12 @@ fun EmptyContactsView(navigator: Navigator, startScanning: @Composable () -> Uni
             onClick = {
                 navigator.push(NFCScreen())
 
-//                startScanning()
-            },
-            colors = ButtonDefaults.buttonColors(
+            }, colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text("Scan New Contact")
         }
-    }
-}
-
-@Composable
-private fun getRelationshipIcon(strength: RelationshipStrength): androidx.compose.ui.graphics.vector.ImageVector {
-    return when (strength) {
-        RelationshipStrength.NEW -> Icons.Default.Star
-        RelationshipStrength.DEVELOPING -> Icons.AutoMirrored.Filled.StarHalf
-        RelationshipStrength.STRONG -> Icons.Default.Star
-    }
-}
-
-private fun getRelationshipColor(strength: RelationshipStrength): Color {
-    return when (strength) {
-        RelationshipStrength.NEW -> Color.Gray
-        RelationshipStrength.DEVELOPING -> Color.Cyan
-        RelationshipStrength.STRONG -> Color.Cyan
     }
 }
 
@@ -509,7 +395,7 @@ private fun getStatusBackgroundColor(status: ContactStatus): Color {
 }
 
 @Composable
-private fun getStatusIcon(status: ContactStatus): androidx.compose.ui.graphics.vector.ImageVector {
+private fun getStatusIcon(status: ContactStatus): ImageVector {
     return when (status) {
         ContactStatus.PENDING -> Icons.Default.Circle
         ContactStatus.FOLLOWED_UP -> Icons.Default.CheckCircle

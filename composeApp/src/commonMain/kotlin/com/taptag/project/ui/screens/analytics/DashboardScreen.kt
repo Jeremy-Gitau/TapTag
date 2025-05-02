@@ -34,12 +34,6 @@ class DashboardScreen : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(contactState.error) {
-            if (contactState.error != null) {
-                contactScreenModel.toggleShowErrorDialog(true)
-            }
-        }
-
         LaunchedEffect(settingsState.accessToken) {
 
             contactScreenModel.fetchAllContacts()
@@ -54,7 +48,10 @@ class DashboardScreen : Screen {
                     contactScreenModel.toggleShowErrorDialog(false)
                 },
                 onRetry = {
+                    contactScreenModel.refreshAccessToken()
+
                     contactScreenModel.toggleShowErrorDialog(false)
+
                     contactScreenModel.fetchAllContacts()
                 }
             )

@@ -9,14 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.taptag.project.ui.common.ErrorDialog
+import com.taptag.project.ui.common.LoadingIndicator
 import com.taptag.project.ui.composables.authentication.signUp.SignUpContent
 import com.taptag.project.ui.screens.authentication.UserScreenModel
 import com.taptag.project.ui.screens.authentication.signInScreen.SignInScreen
@@ -27,60 +26,44 @@ class SignUpScreen : Screen {
     @Composable
     override fun Content() {
 
-        val authenticationScreenModel: UserScreenModel = koinScreenModel()
-        val authState by authenticationScreenModel.state.collectAsState()
-
-        var dismiss by remember { mutableStateOf(false) }
+        val userScreenModel: UserScreenModel = koinScreenModel()
+        val userState by userScreenModel.state.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(authState.error) {
-            println("${authState.error}")
-            println("${authState.currentUser}")
+        LaunchedEffect(userState.error){
+            userScreenModel.toggleErrorDialog(true)
         }
 
-        if (authState.error != null) {
+        when {
+            userState.isLoading -> {
+                LoadingIndicator()
+            }
 
-            AlertDialog(
-                onDismissRequest = { authenticationScreenModel.toggleErrorDialog(false) },
-                confirmButton = {
+            userState.showErrorDialog -> {
 
-                    Button(
-                        onClick = { authenticationScreenModel.toggleErrorDialog(false) }
-                    ) {
-                        Text(
-                            text = "Okay"
-                        )
-                    }
-                },
-                title = {
-                    Text(
-                        text = "Error",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                text = {
-                    Text(
-                        text = authState.error.toString()
-                    )
-                }
-            )
+                ErrorDialog(
+                    message = userState.error,
+                    onDismiss = {userScreenModel.toggleErrorDialog(false)},
+                    onRetry = null
+                )
+            }
+
         }
 
-        if (authState.navigateToSignIn) {
+        if (userState.navigateToSignIn) {
 
             navigator.push(SignInScreen())
 
-            println("${authState.currentUser}")
+            println("${userState.currentUser}")
 
         }
 
         SignUpContent(
-            onClickSignUp = authenticationScreenModel::signUpUser,
-            state = authState,
-            navigate = navigator
+            onClickSignUp = userScreenModel::signUpUser,
+            state = userState,
+            navigate = navigator,
+            userScreenModel = userScreenModel
         )
     }
 }

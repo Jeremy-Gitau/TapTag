@@ -10,16 +10,10 @@ import com.taptag.project.domain.models.RefreshTokenRequestDomain
 import com.taptag.project.domain.repository.ContactsRepository
 import com.taptag.project.domain.repository.PreferenceRepository
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 
 private const val TAG = "ContactScreenModel"
 
@@ -43,7 +37,10 @@ data class ContactState(
     val pendingFollowUps: Int = 5,
     val meetingsThisWeek: Int = 3,
     val searchState: Boolean = false,
-    val showErrorDialog: Boolean = false
+    val showErrorDialog: Boolean = false,
+    val isEditMode: Boolean = false,
+    val showSavedConfirmation: Boolean = false,
+    val contactProfile: ContactDomain = ContactDomain()
 )
 
 class ContactScreenModel(
@@ -51,18 +48,7 @@ class ContactScreenModel(
     private val preferenceRepository: PreferenceRepository
 ) : StateScreenModel<ContactState>(initialState = ContactState()) {
 
-    // Mutex to prevent concurrent token refresh operations
-    private val refreshTokenMutex = Mutex()
-
     private val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}".toRegex()
-
-    // A separate coroutine scope with SupervisorJob for operations that shouldn't be canceled together
-    private val contactsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    init {
-        println("$TAG: Initializing ContactScreenModel")
-        fetchAllContacts()
-    }
 
     fun validateRequiredField(value: String): Boolean = value.isNotEmpty()
 
@@ -99,16 +85,42 @@ class ContactScreenModel(
         updateState { it.copy(showErrorDialog = state) }
     }
 
+    fun toggleIsEditMode(state: Boolean) {
+
+        mutableState.update {
+            it.copy(
+                isEditMode = state
+            )
+        }
+    }
+
+    fun handleProfileUpdate(profile: ContactDomain) {
+        mutableState.update {
+            it.copy(
+                contactProfile = profile
+            )
+        }
+    }
+
+    fun toggleShowSavedConfirmation(state: Boolean) {
+
+        mutableState.update {
+            it.copy(
+                showSavedConfirmation = state
+            )
+        }
+    }
+
     fun onTabSelected(tab: ContactStatus?) {
         println("$TAG: Tab selected: $tab")
-        screenModelScope.launch {
+        this@ContactScreenModel.screenModelScope.launch {
             updateState { it.copy(activeTab = tab) }
         }
     }
 
     fun updateSearchQuery(query: String) {
         println("$TAG: Search query updated: $query")
-        screenModelScope.launch {
+        this@ContactScreenModel.screenModelScope.launch {
             updateState { it.copy(searchQuery = query) }
         }
     }
@@ -149,18 +161,18 @@ class ContactScreenModel(
         return tokenErrorPhrases.any { errorMessage.contains(it, ignoreCase = true) }
     }
 
-    private suspend fun refreshAccessToken() {
-        // Use mutex to prevent concurrent refresh attempts
-        try {
-            refreshTokenMutex.withLock {
+    fun refreshAccessToken() {
+
+        screenModelScope.launch {
+            try {
                 println("$TAG: Refreshing access token")
 
                 val refreshToken = preferenceRepository.readRefreshToken().firstOrNull()
-                    ?: return handleError(ErrorCodes.NO_AUTH_TOKEN, true)
 
+                println("$TAG: refresh token found: $refreshToken")
                 try {
                     val result = contactsRepository.refreshToken(
-                        RefreshTokenRequestDomain(refreshToken = refreshToken)
+                        RefreshTokenRequestDomain(refreshToken = refreshToken.toString())
                     )
 
                     when (result) {
@@ -183,9 +195,9 @@ class ContactScreenModel(
                         handleError("Failed to refresh token: ${e.message}")
                     }
                 }
+            } catch (e: Exception) {
+                println("$TAG: Mutex exception during refresh: ${e.message}")
             }
-        } catch (e: Exception) {
-            println("$TAG: Mutex exception during refresh: ${e.message}")
         }
     }
 
@@ -208,37 +220,33 @@ class ContactScreenModel(
 
     fun saveContact(contact: ContactsRequestDomain) {
         println("$TAG: Saving contact")
-        contactsScope.launch {
+        screenModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    setLoading(true)
-                }
+                setLoading(true)
 
                 val result = withAuthRetry { token ->
                     contactsRepository.saveNewContact(token = token, data = contact)
                 }
 
-                withContext(Dispatchers.Main) {
-                    when (result) {
-                        is DataResult.Success -> {
-                            println("$TAG: Contact saved successfully")
-                            fetchAllContacts()
-                        }
+                println("$TAG: saved contact result: $result")
 
-                        is DataResult.Error -> {
-                            println("$TAG: Error saving contact: ${result.message}")
-                            handleError("Error saving contact: ${result.message}")
-                        }
+                when (result) {
+                    is DataResult.Success -> {
+                        println("$TAG: Contact saved successfully")
+                        fetchAllContacts()
                     }
-                    setLoading(false)
+
+                    is DataResult.Error -> {
+                        println("$TAG: Error saving contact: ${result.message}")
+                        handleError("Error saving contact: ${result.message}")
+                    }
                 }
+                setLoading(false)
             } catch (e: Exception) {
                 println("$TAG: Exception saving contact: ${e.message}")
                 if (e !is CancellationException) {
-                    withContext(Dispatchers.Main) {
-                        handleError("Error saving contact: ${e.message}")
-                        setLoading(false)
-                    }
+                    handleError("Error saving contact: ${e.message}")
+                    setLoading(false)
                 }
             }
         }
@@ -246,37 +254,34 @@ class ContactScreenModel(
 
     fun fetchAllContacts() {
         println("$TAG: Fetching all contacts")
-        contactsScope.launch {
+        screenModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    setLoading(true)
-                }
+                setLoading(true)
 
                 val result = withAuthRetry { token ->
                     contactsRepository.getAllContacts(token)
                 }
 
-                withContext(Dispatchers.Main) {
-                    when (result) {
-                        is DataResult.Success -> {
-                            println("$TAG: Successfully fetched ${result.data.size} contacts")
-                            updateState { it.copy(contacts = result.data) }
-                        }
+                delay(2000)
 
-                        is DataResult.Error -> {
-                            println("$TAG: Error fetching contacts: ${result.message}")
-                            handleError("Error fetching contacts: ${result.message}")
-                        }
+                println("fetched contact data: $result")
+                when (result) {
+                    is DataResult.Success -> {
+                        println("$TAG: Successfully fetched ${result.data.size} contacts")
+                        updateState { it.copy(contacts = result.data) }
                     }
-                    setLoading(false)
+
+                    is DataResult.Error -> {
+                        println("$TAG: Error fetching contacts: ${result.message}")
+                        handleError("Error fetching contacts: ${result.message}")
+                    }
                 }
+                setLoading(false)
             } catch (e: Exception) {
                 println("$TAG: Exception fetching contacts: ${e.message}")
                 if (e !is CancellationException) {
-                    withContext(Dispatchers.Main) {
-                        handleError("Error fetching contacts: ${e.message}")
-                        setLoading(false)
-                    }
+                    handleError("Error fetching contacts: ${e.message}")
+                    setLoading(false)
                 }
             }
         }
@@ -284,37 +289,31 @@ class ContactScreenModel(
 
     fun updateContact(data: ContactsRequestDomain, id: String) {
         println("$TAG: Updating contact with ID: $id")
-        contactsScope.launch {
+        screenModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    setLoading(true)
-                }
+                setLoading(true)
 
                 val result = withAuthRetry { token ->
                     contactsRepository.updateContacts(data = data, id = id)
                 }
 
-                withContext(Dispatchers.Main) {
-                    when (result) {
-                        is DataResult.Success -> {
-                            println("$TAG: Contact updated successfully")
-                            fetchAllContacts()
-                        }
-
-                        is DataResult.Error -> {
-                            println("$TAG: Error updating contact: ${result.message}")
-                            handleError("Error updating contact: ${result.message}")
-                        }
+                when (result) {
+                    is DataResult.Success -> {
+                        println("$TAG: Contact updated successfully")
+                        fetchAllContacts()
                     }
-                    setLoading(false)
+
+                    is DataResult.Error -> {
+                        println("$TAG: Error updating contact: ${result.message}")
+                        handleError("Error updating contact: ${result.message}")
+                    }
                 }
+                setLoading(false)
             } catch (e: Exception) {
                 println("$TAG: Exception updating contact: ${e.message}")
                 if (e !is CancellationException) {
-                    withContext(Dispatchers.Main) {
-                        handleError("Error updating contact: ${e.message}")
-                        setLoading(false)
-                    }
+                    handleError("Error updating contact: ${e.message}")
+                    setLoading(false)
                 }
             }
         }
@@ -322,37 +321,31 @@ class ContactScreenModel(
 
     fun deleteContact(id: String) {
         println("$TAG: Deleting contact with ID: $id")
-        contactsScope.launch {
+        screenModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    setLoading(true)
-                }
+                setLoading(true)
 
                 val result = withAuthRetry { token ->
                     contactsRepository.deleteContacts(id = id)
                 }
 
-                withContext(Dispatchers.Main) {
-                    when (result) {
-                        is DataResult.Success -> {
-                            println("$TAG: Contact deleted successfully")
-                            fetchAllContacts()
-                        }
-
-                        is DataResult.Error -> {
-                            println("$TAG: Error deleting contact: ${result.message}")
-                            handleError("Error deleting contact: ${result.message}")
-                        }
+                when (result) {
+                    is DataResult.Success -> {
+                        println("$TAG: Contact deleted successfully")
+                        fetchAllContacts()
                     }
-                    setLoading(false)
+
+                    is DataResult.Error -> {
+                        println("$TAG: Error deleting contact: ${result.message}")
+                        handleError("Error deleting contact: ${result.message}")
+                    }
                 }
+                setLoading(false)
             } catch (e: Exception) {
                 println("$TAG: Exception deleting contact: ${e.message}")
                 if (e !is CancellationException) {
-                    withContext(Dispatchers.Main) {
-                        handleError("Error deleting contact: ${e.message}")
-                        setLoading(false)
-                    }
+                    handleError("Error deleting contact: ${e.message}")
+                    setLoading(false)
                 }
             }
         }

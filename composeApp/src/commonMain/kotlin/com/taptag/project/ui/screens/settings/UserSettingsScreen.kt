@@ -25,10 +25,6 @@ class UserSettingsScreen: Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(userState.error){
-            userScreenModel.toggleErrorDialog(true)
-        }
-
         when {
             userState.isLoading -> {
                 LoadingIndicator()
@@ -51,7 +47,7 @@ class UserSettingsScreen: Screen {
             userState = userState,
             settingsScreenModel = settingsScreenModel,
             onClickLogOut = userScreenModel::logoutUser,
-            onDismiss = {},
+            onDismiss = {userScreenModel.toggleLogOutDialog(false)},
             authenticationScreenModel = userScreenModel
         )
     }

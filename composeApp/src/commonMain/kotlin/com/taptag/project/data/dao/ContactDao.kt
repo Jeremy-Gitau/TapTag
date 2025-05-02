@@ -14,6 +14,9 @@ interface ContactDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveContact(contact: ContactEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveAllContacts(contacts: List<ContactEntity>)
+
     @Update
     suspend fun updateContact(contact: ContactEntity)
 
@@ -26,7 +29,30 @@ interface ContactDao {
     fun getContactByIdFlow(contactId: Int): Flow<ContactEntity?>
 
     @Transaction
+    @Query("SELECT * FROM contact")
+    suspend fun getAllContacts(): List<ContactEntity>
+
+    @Transaction
+    @Query("SELECT * FROM contact")
+    fun getAllContactsFlow(): Flow<List<ContactEntity>>
+
+    @Transaction
     @Query("DELETE FROM contact WHERE id = :contactId")
     suspend fun deleteContactById(contactId: Int)
 
+    @Transaction
+    @Query("DELETE FROM contact")
+    suspend fun deleteAllContacts()
+
+    @Transaction
+    @Query("SELECT COUNT(*) FROM contact")
+    suspend fun getContactCount(): Int
+
+//    @Transaction
+//    @Query("SELECT * FROM contact WHERE syncPending = 1")
+//    suspend fun getPendingSyncContacts(): List<ContactEntity>
+//
+//    @Transaction
+//    @Query("UPDATE contact SET syncPending = 0 WHERE id = :contactId")
+//    suspend fun markContactSynced(contactId: Int)
 }

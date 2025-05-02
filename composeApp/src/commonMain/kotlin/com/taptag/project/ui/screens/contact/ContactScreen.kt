@@ -35,7 +35,7 @@ import com.taptag.project.ui.composables.contact.ContactTabRow
 import com.taptag.project.ui.composables.contact.EmptyContactsView
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
 
-class ContactScreen(private val token: String?) : Screen {
+class ContactScreen() : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -50,7 +50,7 @@ class ContactScreen(private val token: String?) : Screen {
 
         LaunchedEffect(contactState.contacts) {
 
-            token?.let { contactScreenModel.fetchAllContacts() }
+            contactScreenModel.fetchAllContacts()
 
         }
 
@@ -135,8 +135,7 @@ class ContactScreen(private val token: String?) : Screen {
                 if (contactState.contacts.isEmpty()) {
                     item {
                         EmptyContactsView(
-                            navigator = navigator,
-                            startScanning = { nfcScreenModel.isScanning(true) }
+                            navigator = navigator
                         )
                     }
                 } else {

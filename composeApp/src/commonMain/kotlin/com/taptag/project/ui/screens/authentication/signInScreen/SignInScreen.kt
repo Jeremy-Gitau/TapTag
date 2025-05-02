@@ -35,7 +35,9 @@ class SignInScreen() : Screen {
         }
 
         LaunchedEffect(userState.error){
-            userScreenModel.toggleErrorDialog(true)
+            if (!userState.error.isNullOrEmpty()) {
+                userScreenModel.toggleErrorDialog(true)
+            }
         }
 
         when {
@@ -50,13 +52,15 @@ class SignInScreen() : Screen {
                     onDismiss = {userScreenModel.toggleErrorDialog(false)},
                     onRetry = null
                 )
+
+                println("error is: ${userState.error}")
             }
 
         }
 
         SignInContent(
             onSignIn = userScreenModel::signInUser,
-            navigate = navigator,
+            navigator = navigator,
             userState = userState
         )
 

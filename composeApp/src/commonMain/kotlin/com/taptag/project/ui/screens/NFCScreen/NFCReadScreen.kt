@@ -17,6 +17,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.taptag.project.data.nfcManager.getNFCManager
 import com.taptag.project.ui.composables.nfc.ErrorContent
 import com.taptag.project.ui.composables.nfc.NFCReadScreenContent
+import com.taptag.project.ui.screens.contact.ContactScreenModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -30,6 +31,8 @@ class NFCReadScreen : Screen {
 
         val nfcScreenModel: NFCScreenModel = koinScreenModel()
         val state by nfcScreenModel.state.collectAsState()
+
+        val contactScreenModel: ContactScreenModel = koinScreenModel()
 
         val infiniteTransition = rememberInfiniteTransition(label = "")
 
@@ -62,6 +65,7 @@ class NFCReadScreen : Screen {
                     nfcScreenModel.readTagContact(tagData)
                     nfcScreenModel.readTag(tagData.toString())
                     nfcScreenModel.toggleResultDialog(true)
+//                    contactScreenModel.saveContact(contact = tagData)
                 }
             }
         }
@@ -84,6 +88,7 @@ class NFCReadScreen : Screen {
         }
         NFCReadScreenContent(
             nfcScreenModel = nfcScreenModel,
+            contactScreenModel = contactScreenModel,
             state = state,
             isScanning = state.isScanning,
             onClickStartScanning = {

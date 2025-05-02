@@ -15,17 +15,17 @@ data class AuthRequestData(
 
 @Serializable
 data class AuthResponseData(
-    val accessToken: String,
-    val refreshToken: String,
-    val user: UserData
+    val accessToken: String = "",
+    val refreshToken: String = "",
+    val user: UserData = UserData()
 )
 
 @Serializable
 data class UserData(
-    val id: String,
-    val firstName: String,
-    val lastName: String,
-    val email: String
+    val id: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = ""
 )
 
 @Serializable
@@ -37,4 +37,25 @@ data class RefreshTokenRequestData(
 data class RefreshTokenResponseData(
     val accessToken: String,
     val refreshToken: String
+)
+
+@Serializable
+data class ChangePasswordRequestData(
+    val oldPassword: String,
+    val newPassword: String
+)
+
+@Serializable
+data class UserProfileDto(
+    val id: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    val workEmail: String? = null,
+    val company: String? = null,
+    val role: String = "",
+    val status: String = "",
+    val profilePicture: String = "",
+    val createdAt: String = "",
+    val updatedAt: String = ""
 )

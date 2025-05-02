@@ -57,6 +57,8 @@ fun ContactInputForm(
     var tagsError by remember { mutableStateOf(false) }
     var notesError by remember { mutableStateOf(false) }
 
+    var tagsInput by remember { mutableStateOf(contact.tags.joinToString(", ")) }
+
     val focusManager = LocalFocusManager.current
 
     val nfcManager = getNFCManager()
@@ -81,7 +83,8 @@ fun ContactInputForm(
         Text(
             text = "Full Name *",
             style = labelStyle,
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
         OutlinedTextField(
             value = contact.name,
@@ -119,7 +122,8 @@ fun ContactInputForm(
         Text(
             text = "Email Address *",
             style = labelStyle,
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
         OutlinedTextField(
             value = contact.email,
@@ -163,7 +167,8 @@ fun ContactInputForm(
                 Text(
                     text = "Role *",
                     style = labelStyle,
-                    modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+                    modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 OutlinedTextField(
                     value = contact.role,
@@ -205,7 +210,8 @@ fun ContactInputForm(
                 Text(
                     text = "Company *",
                     style = labelStyle,
-                    modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+                    modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 OutlinedTextField(
                     value = contact.company,
@@ -240,11 +246,11 @@ fun ContactInputForm(
         }
 
         // Tags input
-        var tagsInput by remember { mutableStateOf(contact.tags.joinToString(", ")) }
         Text(
             text = "Tags *",
             style = labelStyle,
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
         OutlinedTextField(
             value = tagsInput,
@@ -282,7 +288,8 @@ fun ContactInputForm(
         Text(
             text = "Notes *",
             style = labelStyle,
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp)
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp, top = 8.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
         OutlinedTextField(
             value = contact.notes,

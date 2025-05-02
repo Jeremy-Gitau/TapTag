@@ -60,7 +60,7 @@ fun UserSettingsScreenContent(
 ) {
 
     LaunchedEffect(userState.isAuthenticated) {
-        if (!userState.isAuthenticated){
+        if (!userState.isAuthenticated) {
             navigator.push(SignInScreen())
         }
     }
@@ -156,7 +156,7 @@ fun UserSettingsScreenContent(
                             SettingsCard(
                                 text = "Profile Info",
                                 icon = Icons.Outlined.Person,
-                                onNavigatorClicked = {navigator.push(UserProfileScreen())})
+                                onNavigatorClicked = { navigator.push(UserProfileScreen()) })
 
                             SettingsCard(
                                 text = "Change Password",
@@ -179,9 +179,9 @@ fun UserSettingsScreenContent(
                                 text = "Log Out",
                                 icon = Icons.AutoMirrored.Filled.Logout,
                                 onNavigatorClicked = {
-
                                     authenticationScreenModel.toggleLogOutDialog(true)
-                                })
+                                }
+                            )
                         }
                     }
                 }

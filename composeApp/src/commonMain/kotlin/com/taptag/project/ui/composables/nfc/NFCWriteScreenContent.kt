@@ -49,7 +49,10 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.taptag.project.data.nfcManager.getNFCManager
+import com.taptag.project.domain.models.ContactsRequestDomain
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
+import com.taptag.project.ui.screens.contact.ContactScreen
+import com.taptag.project.ui.screens.contact.ContactScreenModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -303,9 +306,7 @@ class NFCWriteScreenContent() : Screen {
                         ContactDetailItem("Email", contact.email)
                         ContactDetailItem("Role", contact.role)
                         ContactDetailItem("Company", contact.company)
-                        ContactDetailItem("Last Contact", contact.lastContact)
                         ContactDetailItem("Status", contact.status.getLabel())
-                        ContactDetailItem("Relationship", contact.relationshipStrength.name)
 
                         if (contact.tags.isNotEmpty()) {
                             Text(

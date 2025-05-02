@@ -10,6 +10,8 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<TapTagDatabase> {
 
     return Room.databaseBuilder(
         context = context,
-        name = dbFile.absolutePath
+        name = dbFile.absolutePath,
+        klass = TapTagDatabase::class.java
     )
+        .addMigrations(DATABASE_MIGRATION)
 }

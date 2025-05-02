@@ -19,7 +19,7 @@ expect fun platformModule(): Module
 val dataModule = module {
 
     single<AuthenticationRepository> { AuthenticationRepositoryImpl(get(), get()) }
-    single<ContactsRepository> { ContactRepositoryImpl(get()) }
+    single<ContactsRepository> { ContactRepositoryImpl(get(), get()) }
     single<PaymentsRepository> { PaymentRepositoryImpl(get()) }
     single<AppPreferenceManager> { AppPreferenceManagerImpl(get()) }
     single<PreferenceRepository> { PreferenceRepositoryImpl(get()) }

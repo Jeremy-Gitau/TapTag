@@ -9,7 +9,6 @@ import org.koin.dsl.module
 
 val uiModule = module {
 
-//    single { NFCScreenModel(useCase = get()) }
     singleOf(::NFCScreenModel)
     single { UserScreenModel(get(), get()) }
     single { ContactScreenModel(get(), get()) }

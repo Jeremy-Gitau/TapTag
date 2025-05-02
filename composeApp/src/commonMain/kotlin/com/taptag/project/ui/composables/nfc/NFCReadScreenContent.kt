@@ -17,9 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.outlined.Nfc
-import androidx.compose.material.icons.outlined.PhoneIphone
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,15 +37,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.taptag.project.ui.screens.NFCScreen.NFCContentDisplay
+import com.taptag.project.ui.screens.NFCScreen.ContactProfileContent
 import com.taptag.project.ui.screens.NFCScreen.NFCScreenModel
 import com.taptag.project.ui.screens.NFCScreen.NFCState
-import com.taptag.project.ui.theme.NFCScannerTheme
+import com.taptag.project.ui.screens.contact.ContactScreenModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NFCReadScreenContent(
     nfcScreenModel: NFCScreenModel,
+    contactScreenModel: ContactScreenModel,
     state: NFCState,
     isScanning: Boolean,
     onClickStartScanning: () -> Unit,
@@ -60,9 +59,10 @@ fun NFCReadScreenContent(
     if (state.showResultDialog) {
         SuccessContent(
             onViewContactClick = {
-                navigator.push(NFCContentDisplay())
+                navigator.push(ContactProfileContent())
                 nfcScreenModel.isScanning(false)
                 nfcScreenModel.toggleResultDialog(false)
+                contactScreenModel.toggleIsEditMode(true)
             },
             onDismiss = {
                 nfcScreenModel.toggleResultDialog(false)

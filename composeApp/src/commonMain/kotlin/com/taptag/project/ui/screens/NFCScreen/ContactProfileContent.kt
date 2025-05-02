@@ -1,8 +1,5 @@
 package com.taptag.project.ui.screens.NFCScreen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,35 +12,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Sms
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,80 +42,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.taptag.project.data.nfcManager.getNFCManager
 import com.taptag.project.data.platformShareHandler.getPlatformShareHandler
+import com.taptag.project.domain.models.ContactsRequestDomain
+import com.taptag.project.ui.common.ActionButton
+import com.taptag.project.ui.common.ProfileImage
+import com.taptag.project.ui.common.ProfileInfoItem
+import com.taptag.project.ui.common.SuccessConfirmationOverlay
+import com.taptag.project.ui.screens.contact.ContactScreenModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
-class NFCContentDisplay : Screen {
+class ContactProfileContent : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val scope = rememberCoroutineScope()
-        val snackBarHostState = remember { SnackbarHostState() }
-        var showSavedConfirmation by remember { mutableStateOf(false) }
+
         val scrollState = rememberScrollState()
 
         val nfcScreenModel: NFCScreenModel = koinScreenModel()
         val state by nfcScreenModel.state.collectAsState()
 
+        val contactScreenModel: ContactScreenModel = koinScreenModel()
+        val contactState by contactScreenModel.state.collectAsState()
+
         val navigator = LocalNavigator.currentOrThrow
-        val nfcManager = getNFCManager()
 
         val shareHandler = getPlatformShareHandler()
 
-        nfcManager.RegisterApp()
-
-        scope.launch {
-            nfcManager.tags.collectLatest { tagData ->
-                println("I have detected a tag $tagData")
-                nfcScreenModel.readTag(tagData)
-            }
-        }
-
-        // Listen for write results
-        scope.launch {
-            nfcManager.writeResult.collectLatest { success ->
-                nfcScreenModel.toggleWriteStatus(
-                    if (success) {
-                        "Tag written successfully!"
-                    } else {
-                        "Failed to write to tag. Please try again."
-                    }
-                )
-                nfcScreenModel.toggleIsWriteMode(!success) // Stay in write mode if failed
-                if (success) {
-                    // Reset UI after successful write
-                    nfcScreenModel.toggleShowWriteDialog(false)
-                    nfcScreenModel.toggleResultDialog(true)
-                    nfcScreenModel.isSuccess(success, "Tag written successfully with custom data")
-                }
-            }
-        }
-
         // Handle saved confirmation animation
-        LaunchedEffect(showSavedConfirmation) {
-            if (showSavedConfirmation) {
+        LaunchedEffect(contactState.showSavedConfirmation) {
+            if (contactState.showSavedConfirmation) {
                 delay(2000)
-                showSavedConfirmation = false
+                contactScreenModel.toggleShowSavedConfirmation(false)
             }
         }
 
@@ -148,7 +104,20 @@ class NFCContentDisplay : Screen {
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    ),
+                    actions = {
+                        if (contactState.isEditMode) {
+                            IconButton(
+                                onClick = { contactScreenModel.toggleIsEditMode(false) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = "cancel save contact",
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                    }
                 )
             },
             floatingActionButton = {
@@ -156,44 +125,43 @@ class NFCContentDisplay : Screen {
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    FloatingActionButton(
-                        onClick = {
-                            // Save contact logic
-                            scope.launch {
-                                snackBarHostState.showSnackbar("Contact saved to your contacts")
-                            }
-                            showSavedConfirmation = true
-                        },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Save,
-                            contentDescription = "Save Contact"
-                        )
-                    }
 
-                    FloatingActionButton(
-                        onClick = { nfcScreenModel.observeCurrentContact(state.currentContact) },
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Contact"
-                        )
-                    }
-                }
-            },
-            snackbarHost = {
-                SnackbarHost(hostState = snackBarHostState) { data ->
-                    Snackbar(
-                        modifier = Modifier.padding(16.dp),
-                        action = {
-                            Button(onClick = { data.dismiss() }) {
-                                Text("OK")
-                            }
+                    if (contactState.isEditMode) {
+                        FloatingActionButton(
+                            onClick = {
+                                // Save contact logic
+                                contactScreenModel.toggleShowSavedConfirmation(true)
+                                contactScreenModel.toggleIsEditMode(false)
+                                contactScreenModel.saveContact(ContactsRequestDomain(
+                                    name = state.currentContact.name,
+                                    email = state.currentContact.email,
+                                    phone = "",
+                                    notes = state.currentContact.notes,
+                                    company = state.currentContact.company,
+                                    tags = state.currentContact.tags
+                                ))
+                            },
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = "Save Contact"
+                            )
                         }
-                    ) {
-                        Text(data.visuals.message)
+                    } else {
+
+                        FloatingActionButton(
+                            onClick = {
+                                nfcScreenModel.observeCurrentContact(state.currentContact)
+                                contactScreenModel.toggleIsEditMode(true)
+                            },
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Contact"
+                            )
+                        }
                     }
                 }
             }
@@ -222,21 +190,10 @@ class NFCContentDisplay : Screen {
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 // Profile image
-                                Box(
-                                    modifier = Modifier
-                                        .size(120.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .padding(4.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = contact.name.take(2).uppercase(),
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        fontSize = 48.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                                ProfileImage(
+                                    text = contact.name.take(2).uppercase(),
+                                    editImage = false
+                                )
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -273,9 +230,19 @@ class NFCContentDisplay : Screen {
                                     )
 
                                     ActionButton(
-                                        icon = Icons.Default.Share,
-                                        label = "Share",
-                                        onClick = { /* Share action */ }
+                                        icon = Icons.Outlined.Sms,
+                                        label = "Text",
+                                        onClick = {
+//                                            shareHandler.sendSms(contact.phoneNumber)
+                                        }
+                                    )
+
+                                    ActionButton(
+                                        icon = Icons.Default.Whatsapp,
+                                        label = "WhatsApp",
+                                        onClick = {
+//                                            shareHandler.openWhatsApp(contact.phoneNumber)
+                                        }
                                     )
                                 }
                             }
@@ -297,59 +264,89 @@ class NFCContentDisplay : Screen {
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
 
-                                ContactProfileItem(
+                                ProfileInfoItem(
                                     icon = Icons.Default.AccountCircle,
                                     label = "Name",
-                                    value = contact.name
+                                    value = contact.name,
+                                    isEdit = contactState.isEditMode,
+                                    textToWrite = contact.name,
+                                    onValueChanged = {
+                                        nfcScreenModel.observeCurrentContact(
+                                            state.currentContact.copy(
+                                                name = it
+                                            )
+                                        )
+                                    }
                                 )
 
                                 if (contact.email.isNotEmpty()) {
-                                    ContactProfileItem(
+                                    ProfileInfoItem(
                                         icon = Icons.Default.Email,
                                         label = "Email",
-                                        value = contact.email
+                                        value = contact.email,
+                                        isEdit = contactState.isEditMode,
+                                        textToWrite = contact.email,
+                                        onValueChanged = {
+                                            nfcScreenModel.observeCurrentContact(
+                                                state.currentContact.copy(
+                                                    email = it
+                                                )
+                                            )
+                                        }
                                     )
                                 }
 
                                 if (contact.role.isNotEmpty()) {
-                                    ContactProfileItem(
+                                    ProfileInfoItem(
                                         icon = Icons.Default.Work,
                                         label = "Role",
-                                        value = contact.role
+                                        value = contact.role,
+                                        isEdit = contactState.isEditMode,
+                                        textToWrite = contact.role,
+                                        onValueChanged = {
+                                            nfcScreenModel.observeCurrentContact(
+                                                state.currentContact.copy(
+                                                    role = it
+                                                )
+                                            )
+                                        }
                                     )
                                 }
 
                                 if (contact.company.isNotEmpty()) {
-                                    ContactProfileItem(
+                                    ProfileInfoItem(
                                         icon = Icons.Default.Work,
                                         label = "Company",
-                                        value = contact.company
+                                        value = contact.company,
+                                        isEdit = contactState.isEditMode,
+                                        textToWrite = contact.company,
+                                        onValueChanged = {
+                                            nfcScreenModel.observeCurrentContact(
+                                                state.currentContact.copy(
+                                                    company = it
+                                                )
+                                            )
+                                        }
                                     )
                                 }
 
-                                if (contact.lastContact.isNotEmpty()) {
-                                    ContactProfileItem(
-                                        icon = Icons.Default.Stars,
-                                        label = "Last Contact",
-                                        value = contact.lastContact
-                                    )
-                                }
+//                                if (contact.status.getLabel().isNotEmpty()) {
+//                                    ProfileInfoItem(
+//                                        icon = Icons.Default.Stars,
+//                                        label = "Status",
+//                                        value = contact.status.getLabel(),
+//                                        isEdit = contactState.isEditMode,
+//                                        textToWrite = contact.status.getLabel(),
+//                                        onValueChanged = {
+//                                            nfcScreenModel.observeCurrentContact(
+//                                                state.currentContact.copy(
+//                                                    status = it
+//                                                )
+//                                            )
+//                                        }
+//                                    )
+//                                }
 
-                                if (contact.status.getLabel().isNotEmpty()) {
-                                    ContactProfileItem(
-                                        icon = Icons.Default.Stars,
-                                        label = "Status",
-                                        value = contact.status.getLabel()
-                                    )
-                                }
-
-                                if (contact.relationshipStrength.name.isNotEmpty()) {
-                                    ContactProfileItem(
-                                        icon = Icons.Default.Stars,
-                                        label = "Relationship",
-                                        value = contact.relationshipStrength.name
-                                    )
-                                }
                             }
                         }
 
@@ -429,116 +426,13 @@ class NFCContentDisplay : Screen {
                 }
 
                 // Success confirmation overlay
-                AnimatedVisibility(
-                    visible = showSavedConfirmation,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.7f))
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.size(200.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(80.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primaryContainer),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Text(
-                                    text = "Contact Saved",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ContactProfileItem(icon: ImageVector, label: String, value: String) {
-    if (value.isNotEmpty()) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(start = 8.dp)
+                SuccessConfirmationOverlay(
+                    state = contactState.showSavedConfirmation,
+                    text = "Contact Saved"
                 )
             }
-
-            Text(
-                text = value,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(start = 28.dp, top = 4.dp)
-            )
-
-            Divider(modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
 
-@Composable
-fun ActionButton(icon: ImageVector, label: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
-    ) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .size(48.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}

@@ -23,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -136,7 +135,7 @@ fun DashboardScreenContent(
                         )
 
                         TextButton(
-                            onClick = { navigator.parent?.push(ContactScreen(token = token)) }
+                            onClick = { navigator.parent?.push(ContactScreen()) }
                         ) {
                             Text(
                                 text = "Details",
@@ -155,8 +154,7 @@ fun DashboardScreenContent(
                 if (contactState.contacts.isEmpty()) {
                     item {
                         EmptyContactsView(
-                            navigator = navigator,
-                            startScanning = { nfcScreenModel.isScanning(true) }
+                            navigator = navigator
                         )
                     }
                 } else {

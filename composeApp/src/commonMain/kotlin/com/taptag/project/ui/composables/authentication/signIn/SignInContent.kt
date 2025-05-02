@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,17 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
 import com.taptag.project.domain.models.AuthRequestDomain
-import com.taptag.project.ui.common.LoadingIndicator
 import com.taptag.project.ui.screens.authentication.UserState
+import com.taptag.project.ui.screens.authentication.signInScreen.ForgotPasswordScreen
 import com.taptag.project.ui.screens.authentication.signUpScreen.SignUpScreen
 import kotlin.reflect.KFunction1
 
 @Composable
 fun SignInContent(
     onSignIn: KFunction1<AuthRequestDomain, Unit>,
-    onForgotPassword: () -> Unit = {},
-    onSignUp: () -> Unit = {},
-    navigate: Navigator,
+    navigator: Navigator,
     userState: UserState
 ) {
     var email by remember { mutableStateOf("") }
@@ -129,7 +126,9 @@ fun SignInContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
-                    onClick = onForgotPassword,
+                    onClick = {
+                        navigator.push(ForgotPasswordScreen())
+                    },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
                     )
@@ -181,7 +180,7 @@ fun SignInContent(
                     color = Color.Gray
                 )
                 TextButton(
-                    onClick = { navigate.push(SignUpScreen()) },
+                    onClick = { navigator.push(SignUpScreen()) },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color(0xFF10B981)
                     )
